@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <base target="_top" />
+    <?!= include("global-css"); ?>
+    <?!= include("trade-css"); ?>
+    <title>Bitmart Utility</title>
+  </head>
+  <body>
+    <!-- API Info -->
+    <div
+      class="modal fade"
+      id="setAPIInfoModal"
+      tabindex="-1"
+      aria-labelledby="setAPIInfoModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="setAPIInfoModalLabel">API Info</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-warning">
+              4/9/2022 - PLEASE READ AND ACCEPT THE FOLLOWING DISCLAIMER
+            </p>
+            <p>By using this open-source application you agree that:</p>
+            <ul>
+              <li>
+                The code provided is as is and not as a service or requirement
+              </li>
+              <li>That you have verified the code prior to use</li>
+              <li>
+                It is your responsibility to ensure it works according to your
+                requirements.
+              </li>
+              <li>
+                There are no warranties implied or expressed. You agree that you
+                are 100% responsible for the results of using or interacting
+                with this application.
+              </li>
+              <li>
+                Although intentions are to provide bug-free and error-free code,
+                there are times when this may still happen and you may suffer
+                losses as a result. If this is a concern, please do not use this
+                application. You agree that the creator of this application is
+                not responsible or liable in any way shape or form for any
+                errors, losses of funds, problems, issues, or any of the like
+                and that they are not required to fix said issues should they
+                arise while using the application.
+              </li>
+            </ul>
+            <p>
+              Continued use of this application means that you accept these
+              terms.
+            </p>
+
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                class="form-control is-invalid"
+                id="setAPIMemo"
+                placeholder="API Memo"
+                pattern=".{1,}"
+                title="Can't be blank"
+              />
+              <label for="setAPIMemo">Memo</label>
+              <div class="valid-feedback">Looks good!</div>
+              <div id="MemoValidationFeedback" class="invalid-feedback">
+                Memo can't be blank
+              </div>
+            </div>
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                class="form-control is-invalid"
+                id="setAPIKey"
+                placeholder="API Key"
+                pattern=".{40,}"
+                title="Key not long enough, try pasting again"
+              />
+              <label for="setAPIKey">Key</label>
+              <div class="valid-feedback">Looks good!</div>
+              <div id="keyValidationFeedback" class="invalid-feedback">
+                Key must be 40 chars long
+              </div>
+            </div>
+            <div class="form-floating mb-3">
+              <input
+                type="password"
+                class="form-control is-invalid"
+                id="setAPISecret"
+                placeholder="API Secret"
+                pattern=".{64,}"
+                title="Secret not long enough, try pasting again"
+              />
+              <label for="setAPISecret">Secret</label>
+              <div class="valid-feedback">Looks good!</div>
+              <div id="secretValidationFeedback" class="invalid-feedback">
+                Secret must be 64 chars long
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="col" id="saveAPIResults"></div>
+            <div class="col-4 text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-danger px-1 no-focus"
+                id="deleteAPIInfo"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary px-1 no-focus"
+                data-bs-dismiss="modal"
+                id="closeAPIInfo"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary px-1 no-focus"
+                id="saveAPIInfo"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Webhook -->
+    <div
+      class="modal fade"
+      id="saveWebhookModal"
+      tabindex="-1"
+      aria-labelledby="saveWebhookModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="saveWebhookModalLabel">
+              Discord Webhook
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-floating mb-3">
+              <input
+                type="text"
+                class="form-control is-invalid"
+                id="setWebhookUrl"
+                placeholder="https://discord.com/api/webhooks/"
+                title="Can't be blank"
+              />
+              <label for="setWebhookUrl">Discord Webhook URL:</label>
+              <div class="valid-feedback">Looks good!</div>
+              <div class="invalid-feedback">Not a valid Discord Webhook</div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="col" id="saveWebhookResults"></div>
+            <div class="col-4 text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-danger px-1 no-focus"
+                id="deleteWebhook"
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary px-1 no-focus"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary px-1 no-focus"
+                id="saveWebhook"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Initial Import -->
+    <div
+      class="modal fade"
+      id="initialImportModal"
+      tabindex="-1"
+      aria-labelledby="initialImportModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Initial Import</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>
+              This will attempt to import active and previous trade history to
+              the spreadsheet. Bitmart is very limited on how much data they
+              provide. Only 200 trades and 100 active orders can be imported per
+              coin.
+            </p>
+            <p class="text-danger">
+              This will use up a good chunk of the Apps Script daily fetch quota
+              so make sure you want to do this. If you have order/trade history
+              on the spreadsheet already do not run this without deleting all
+              rows except for the 1st (header) row on all sheets.
+            </p>
+            <p class="text-warning">
+              It is still recommended to acquire a CSV from Bitmart at the EOY
+              for comparison. The format of their CSV will most likely be
+              different though so keep that in mind. It also doesn't allow
+              imports of delisted coins.
+            </p>
+            <p>
+              This can take ~20 minutes. It's best if you just leave the page as
+              is when importing. Go get a snack :)
+            </p>
+          </div>
+          <div class="modal-footer">
+            <div class="col text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                data-bs-dismiss="modal"
+                id="startInitialImportActive"
+              >
+                Import Active
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                data-bs-dismiss="modal"
+                id="startInitialImportClosed"
+              >
+                Import Closed
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                data-bs-dismiss="modal"
+                id="startInitialImportAll"
+              >
+                Import All
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancel Import -->
+    <div
+      class="modal fade"
+      id="cancelImport"
+      tabindex="-1"
+      aria-labelledby="cancelImport"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Cancel Import?</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to cancel the import?
+          </div>
+          <div class="modal-footer">
+            <div class="col-4 text-end">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                class="btn btn-warning"
+                data-bs-dismiss="modal"
+                id="cancelInitialImport"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+      <div class="container-fluid">
+        <h3 class="text-light">Bitmart Utility</h3>
+        <button
+          class="navbar-toggler p-1"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="offcanvas offcanvas-start"
+          tabindex="-1"
+          id="navbarSupportedContent"
+        >
+          <div class="offcanvas-body bg-dark">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+              <li class="nav-item">
+                <a
+                  type="button"
+                  class="btn btn-sm btn-link text-light text-decoration-none"
+                  id="goToScanner"
+                >
+                  Scanner
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  type="button"
+                  class="btn btn-sm btn-link text-light text-decoration-none"
+                  id="goToTrade"
+                >
+                  Trade
+                </a>
+              </li>
+            </ul>
+            <div>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary me-2 mb-sm-1"
+                id="initialImport"
+                data-bs-toggle="modal"
+                data-bs-target="#initialImportModal"
+              >
+                Import
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary me-2 mb-sm-1"
+                id="webhookInfo"
+                data-bs-toggle="modal"
+                data-bs-target="#saveWebhookModal"
+              >
+                Webhook
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary me-2 mb-sm-1"
+                id="openSpreadsheet"
+              >
+                Spreadsheet
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                class="btn btn-sm btn-primary me-4 mb-sm-1"
+                data-bs-toggle="modal"
+                data-bs-target="#setAPIInfoModal"
+              >
+                API Info
+              </button>
+            </div>
+            <div id="urlFetchQuota" class="text-light me-3 pt-1">0/20000</div>
+            <div class="text-light me-3 pt-1" id="version">v1.0</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Container -->
+    <div class="container-fluid">
+      <!-- Stats -->
+      <div
+        class="row mt-1 text-light text-center border-bottom"
+        id="marketStatsContainer"
+      >
+        <div class="col-2">
+          <div class="vstack">
+            <!-- lg -->
+            <button
+              type="button"
+              class="btn btn-sm btn-dark d-none d-xxl-block no-focus"
+              id="focusSearch"
+            >
+              <div>
+                <span class="focusSearchBase">BTC</span>
+                <span class="badge bg-secondary focusSearchQuote">USDT </span>
+              </div>
+              <div class="text-secondary focusSearchName">Bitcoin</div>
+            </button>
+
+            <!-- sm -->
+            <button
+              type="button"
+              class="btn btn-sm btn-dark d-xxl-none no-focus"
+              data-bs-target="#smMarketSymbols"
+              data-bs-toggle="offcanvas"
+            >
+              <div>
+                <span class="focusSearchBase">BTC</span>
+                <span class="badge bg-secondary focusSearchQuote">USDT </span>
+              </div>
+              <div class="text-secondary focusSearchName">Bitcoin</div>
+            </button>
+          </div>
+        </div>
+        <div class="col">
+          <div class="hstack gap-4">
+            <div class="vstack">
+              <div class="placeholder-glow">
+                <span id="websocketConnection" class="placeholder col"
+                  >Offline
+                </span>
+              </div>
+              <div class="text-secondary">Websocket</div>
+            </div>
+            <div class="vstack">
+              <div class="placeholder-glow">
+                <span id="statsLast" class="placeholder col">0</span>
+              </div>
+              <div class="text-secondary">24h Last</div>
+            </div>
+            <div class="vstack">
+              <div class="placeholder-glow">
+                <span id="statsOpen" class="placeholder col">0</span>
+              </div>
+              <div class="text-secondary">24h Open</div>
+            </div>
+            <div class="vstack">
+              <div class="placeholder-glow">
+                <span id="statsHigh" class="placeholder col">0</span>
+              </div>
+              <div class="text-secondary">24h High</div>
+            </div>
+            <div class="vstack">
+              <div class="placeholder-glow">
+                <span id="statsLow" class="placeholder col">0</span>
+              </div>
+              <div class="text-secondary">24h Low</div>
+            </div>
+            <div class="vstack">
+              <div class="placeholder-glow">
+                <span id="statsBVol" class="placeholder col">0</span>
+              </div>
+              <div class="text-secondary">Base Vol</div>
+            </div>
+            <div class="vstack">
+              <div class="placeholder-glow">
+                <span id="statsQVol" class="placeholder col">0</span>
+              </div>
+              <div class="text-secondary">Quote Vol</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-1 text-light text-center vh-100">
+        <!-- Markets -->
+        <!-- Lg -->
+        <div class="col-2 mt-2 d-none d-xxl-block">
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm mb-1">
+                <span class="input-group-text">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    fill="currentColor"
+                    class="bi bi-search"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"
+                    />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  class="form-control border-start-0 border-end-0 searchMarketsInput"
+                  placeholder="Search markets..."
+                  aria-label="Username"
+                  aria-describedby="searchIcon"
+                  id="searchMarketsLg"
+                />
+                <span class="input-group-text pe-1 border-end-0">
+                  <select
+                    class="form-select form-select-sm no-focus pe-1 chooseChartStep"
+                    aria-label="Choose time frame"
+                  >
+                    <option value="1">1m</option>
+                    <!-- <option value="3">3m</option> -->
+                    <option value="5">5m</option>
+                    <option value="15">15m</option>
+                    <option value="30">30m</option>
+                    <!-- <option value="45">45m</option> -->
+                    <option value="60" selected>1h</option>
+                    <option value="120">2h</option>
+                    <!-- <option value="180">3h</option> -->
+                    <option value="240">4h</option>
+                    <option value="1440">1D</option>
+                    <option value="10080">1W</option>
+                    <option value="43200">1M</option>
+                  </select>
+                </span>
+                <span class="input-group-text ps-0 pe-1 border-start-0">
+                  <select
+                    class="form-select form-select-sm no-focus ps-1 pe-1 chooseCandleSets"
+                    aria-label="Choose candle amount"
+                  >
+                    <option value="1" selected>500.C</option>
+                    <option value="2">1K.C</option>
+                    <option value="3">1.5K.C</option>
+                    <option value="4">2k.C</option>
+                    <option value="5">2.5K.C</option>
+                  </select>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="d-grid gap-2">
+                <div
+                  class="btn-group btn-group-sm selectMarketQuote"
+                  role="group"
+                  aria-label="Select market quote"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary no-focus"
+                    id="marketsNavSelectAll"
+                    data-nav="All"
+                  >
+                    All
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary no-focus"
+                    id="marketsNavSelectBTC"
+                    data-nav="BTC"
+                  >
+                    BTC
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary no-focus"
+                    id="marketsNavSelectETH"
+                    data-nav="ETH"
+                  >
+                    ETH
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary no-focus"
+                    id="marketsNavSelectUSDT"
+                    data-nav="USDT"
+                  >
+                    USDT
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary no-focus"
+                    id="marketsNavSelectFavorites"
+                    data-nav="Fav"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-star clickFix"
+                      viewBox="0 0 16 20"
+                    >
+                      <path
+                        d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col text-start" id="marketsNav">
+              <a
+                type="button"
+                class="btn btn-sm btn-link text-decoration-none link-light"
+                data-sort="Market"
+                id="sortByMarket"
+              >
+                <span data-sort="Market">Market</span>
+                <span id="marketNavSvg" data-sort="Market">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    class="bi bi-arrow-up"
+                    viewBox="0 0 16 16"
+                    data-sort="Market"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"
+                    />
+                  </svg>
+                </span>
+              </a>
+            </div>
+            <div class="col-auto text-end">
+              <span
+                ><a
+                  type="button"
+                  class="btn btn-sm btn-link text-decoration-none link-light"
+                  data-sort="Change"
+                  id="sortByChange"
+                >
+                  <span data-sort="Change">Change(24h)</span>
+                </a></span
+              >
+              <span>/</span>
+              <span
+                ><a
+                  type="button"
+                  class="btn btn-sm btn-link text-decoration-none link-light"
+                  data-sort="Price"
+                  id="sortByPrice"
+                  >Price</a
+                ></span
+              >
+            </div>
+          </div>
+          <div class="row" id="marketsListContainer">
+            <div class="col pe-1">
+              <div
+                class="list-group list-group-sm bitUtilityScroll marketsList"
+                id="marketsListLg"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <!-- Sm -->
+        <div
+          class="col-2 mt-2 d-xxl-none offcanvas offcanvas-start bg-dark"
+          tabindex="-1"
+          id="smMarketSymbols"
+        >
+          <div class="offcanvas-body">
+            <div class="row">
+              <div class="col">
+                <div class="input-group input-group-sm mb-1">
+                  <span class="input-group-text">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      fill="currentColor"
+                      class="bi bi-search"
+                      viewBox="0 0 16 16"
+                    >
+                      <path
+                        d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control border-start-0 border-end-0 searchMarketsInput"
+                    placeholder="Search markets..."
+                    aria-label="Username"
+                    aria-describedby="searchIcon"
+                  />
+                  <span class="input-group-text pe-1 border-end-0">
+                    <select
+                      class="form-select form-select-sm no-focus pe-1 chooseChartStep"
+                      aria-label="Choose time frame"
+                    >
+                      <option value="1">1m</option>
+                      <option value="3">3m</option>
+                      <option value="5">5m</option>
+                      <option value="15">15m</option>
+                      <option value="30">30m</option>
+                      <option value="45">45m</option>
+                      <option value="60" selected>1h</option>
+                      <option value="120">2h</option>
+                      <option value="180">4h</option>
+                      <option value="240">8h</option>
+                      <option value="1440">1D</option>
+                      <option value="10080">1W</option>
+                      <option value="43200">1M</option>
+                    </select>
+                  </span>
+                  <span class="input-group-text ps-0 pe-1 border-start-0">
+                    <select
+                      class="form-select form-select-sm no-focus ps-1 pe-1 chooseCandleSets"
+                      aria-label="Choose candle amount"
+                    >
+                      <option value="1" selected>500.C</option>
+                      <option value="2">1K.C</option>
+                      <option value="3">1.5K.C</option>
+                      <option value="4">2k.C</option>
+                      <option value="5">2.5K.C</option>
+                    </select>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <div class="d-grid gap-2">
+                  <div
+                    class="btn-group btn-group-sm selectMarketQuote"
+                    role="group"
+                    aria-label="Select market quote"
+                  >
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary no-focus"
+                      id="marketsNavSelectAll"
+                      data-nav="All"
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary no-focus"
+                      id="marketsNavSelectBTC"
+                      data-nav="BTC"
+                    >
+                      BTC
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary no-focus"
+                      id="marketsNavSelectETH"
+                      data-nav="ETH"
+                    >
+                      ETH
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary no-focus"
+                      id="marketsNavSelectUSDT"
+                      data-nav="USDT"
+                    >
+                      USDT
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary no-focus"
+                      id="marketsNavSelectFavorites"
+                      data-nav="Fav"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        class="bi bi-star clickFix"
+                        viewBox="0 0 16 20"
+                      >
+                        <path
+                          d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col text-start" id="marketsNav">
+                <a
+                  type="button"
+                  class="btn btn-sm btn-link text-decoration-none link-light"
+                  data-sort="Market"
+                  id="sortByMarket"
+                >
+                  <span data-sort="Market">Market</span>
+                  <span id="marketNavSvg" data-sort="Market">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      class="bi bi-arrow-up"
+                      viewBox="0 0 16 16"
+                      data-sort="Market"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"
+                      />
+                    </svg>
+                  </span>
+                </a>
+              </div>
+              <div class="col-auto text-end">
+                <span
+                  ><a
+                    type="button"
+                    class="btn btn-sm btn-link text-decoration-none link-light"
+                    data-sort="Change"
+                    id="sortByChange"
+                  >
+                    <span data-sort="Change">Change(24h)</span>
+                  </a></span
+                >
+                <span>/</span>
+                <span
+                  ><a
+                    type="button"
+                    class="btn btn-sm btn-link text-decoration-none link-light"
+                    data-sort="Price"
+                    id="sortByPrice"
+                    >Price</a
+                  ></span
+                >
+              </div>
+            </div>
+            <div class="row" class="marketsListContainer">
+              <div class="col pe-1">
+                <div
+                  class="list-group list-group-sm bitUtilityScroll marketsList"
+                  id="marketsListSm"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart/Terminal/Current/History -->
+        <div class="col mt-2">
+          <!-- Chart/Terminal -->
+          <div class="row" id="chartTerminalContainer">
+            <!-- Chart -->
+            <div class="col-xxl-9 col-sm-12">
+              <!-- Header -->
+              <div class="row mb-1">
+                <div class="col text-start">
+                  <span class="me-5">
+                    Breakeven:
+                    <span class="text-warning" id="breakEvenPrice">0</span>
+                  </span>
+                  <span>PnL: <span id="pnl">0</span></span>
+                </div>
+                <div class="col text-end">
+                  <div class="btn-group">
+                    <button
+                      class="btn btn-sm btn-secondary dropdown-toggle py-0 no-focus"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      Markers
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                      <li>
+                        <button id="toggleMarkers" class="dropdown-item">
+                          Toggle Markers
+                        </button>
+                      </li>
+                      <li>
+                        <button id="toggleMarkerPrices" class="dropdown-item">
+                          Toggle Prices
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div class="btn-group">
+                    <button
+                      class="btn btn-sm btn-secondary dropdown-toggle py-0 no-focus"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      Orders
+                    </button>
+                    <ul
+                      class="dropdown-menu dropdown-menu-dark dropdown-menu-end"
+                    >
+                      <li>
+                        <button id="toggleActive" class="dropdown-item">
+                          Toggle Active
+                        </button>
+                      </li>
+                      <li>
+                        <button id="toggleLineSymbol" class="dropdown-item">
+                          Toggle Symbol
+                        </button>
+                      </li>
+                      <li>
+                        <button id="toggleLineSize" class="dropdown-item">
+                          Toggle Size
+                        </button>
+                      </li>
+                      <li>
+                        <button id="toggleScreenshotMode" class="dropdown-item">
+                          Screenshot Mode
+                        </button>
+                      </li>
+                      <li>
+                        <button id="toggleShowTp" class="dropdown-item">
+                          Toggle TP
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <!-- Body -->
+              <div class="row">
+                <div class="col">
+                  <div id="chartArea" class="position-relative"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terminal -->
+            <div class="col-xxl-3 col-sm-12">
+              <!-- Header -->
+              <div class="row">
+                <div class="col text-center">
+                  <!-- Quote Amount -->
+                  <div class="d-grid gap-2">
+                    <button
+                      type="button"
+                      id="getAvailableQuote"
+                      class="btn btn-link text-decoration-none text-light pt-0 no-focus disableForm"
+                      disabled
+                    >
+                      <div class="row">
+                        <div class="col-auto text-start">
+                          <span>Wallet:</span>
+                        </div>
+                        <div class="col text-end">
+                          <span id="currentWalletAmt">0</span>
+                          <span id="walletQuote">USDT</span>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            fill="currentColor"
+                            class="bi bi-wallet"
+                            viewBox="0 0 16 16"
+                          >
+                            <path
+                              d="M0 3a2 2 0 0 1 2-2h13.5a.5.5 0 0 1 0 1H15v2a1 1 0 0 1 1 1v8.5a1.5 1.5 0 0 1-1.5 1.5h-12A2.5 2.5 0 0 1 0 12.5V3zm1 1.732V12.5A1.5 1.5 0 0 0 2.5 14h12a.5.5 0 0 0 .5-.5V5H2a1.99 1.99 0 0 1-1-.268zM1 3a1 1 0 0 0 1 1h12V2H2a1 1 0 0 0-1 1z"
+                            ></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- Body -->
+              <div class="row">
+                <div class="col">
+                  <!-- Trade Category -->
+                  <div class="d-grid gap-2">
+                    <select
+                      class="form-select form-select-sm no-focus disableForm"
+                      aria-label="Select simple or smart trade"
+                      id="selectTradeCategory"
+                      disabled
+                    >
+                      <option value="simple">Simple</option>
+                      <option value="smart">Smart</option>
+                    </select>
+                  </div>
+                  <!-- Simple -->
+                  <div class="d-block" id="simpleContainer">
+                    <!-- Select Side -->
+                    <div class="row mb-1">
+                      <div class="col">
+                        <div
+                          id="selectSimpleBuyOrderToggle"
+                          class="d-grid gap-0 buy toggle selected"
+                        >
+                          <button
+                            id="selectSimpleBuyOrder"
+                            class="btn btn-sm btn-link text-decoration-none text-success no-focus buy disableForm"
+                            disabled
+                          >
+                            Buy
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col pe-0">
+                        <div
+                          id="selectSimpleSellOrderToggle"
+                          class="d-grid gap-0 sell toggle"
+                        >
+                          <button
+                            id="selectSimpleSellOrder"
+                            class="btn btn-sm btn-link text-decoration-none text-danger no-focus sell disableForm"
+                            disabled
+                          >
+                            Sell
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col-2 text-end ps-0 align-self-center">
+                        <button
+                          type="button"
+                          id="clearSimpleForm"
+                          class="btn btn-sm btn-secondary no-focus py-0 mt-1 px-1 disableForm"
+                          disabled
+                        >
+                          X
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Order Details -->
+                    <div class="row">
+                      <div class="col">
+                        <form
+                          class="needs-validation"
+                          name="simpleBuyOrder"
+                          id="simpleForm"
+                          novalidate
+                        >
+                          <fieldset class="disableForm" disabled>
+                            <div>
+                              <input
+                                id="selectSimpleSide"
+                                name="side"
+                                type="text"
+                                value="buy"
+                                hidden
+                              />
+                              <input
+                                class="currentSymbol"
+                                name="symbol"
+                                type="text"
+                                value="BTC_USDT"
+                                hidden
+                              />
+                              <input
+                                name="is_smart"
+                                type="text"
+                                value="false"
+                                hidden
+                              />
+                            </div>
+                            <!-- Trade Type -->
+                            <div class="mb-1">
+                              <select
+                                tabindex="1"
+                                class="form-select form-select-sm mb-1 no-focus input-focus"
+                                aria-label="Select ladder limit or single trade"
+                                id="simpleTradeType"
+                                name="simpleTradeType"
+                              >
+                                <option value="single">Single</option>
+                                <option value="ladder">Ladder Limit</option>
+                              </select>
+                            </div>
+                            <!-- Order Type -->
+                            <div class="mb-1">
+                              <select
+                                tabindex="2"
+                                class="form-select form-select-sm no-focus input-focus"
+                                aria-label="select limit order or market order"
+                                id="simpleOrderType"
+                                name="simpleOrderType"
+                              >
+                                <option value="limit">Limit</option>
+                                <option value="market">Market</option>
+                              </select>
+                            </div>
+                            <!-- Price A -->
+                            <div
+                              class="mb-1 input-group input-group-sm position-relative"
+                            >
+                              <span class="input-group-text">Price A</span>
+                              <input
+                                tabindex="3"
+                                type="number"
+                                class="form-control form-control-sm input-focus"
+                                id="simplePriceA"
+                                placeholder="0.00"
+                                step="0.01"
+                                name="simplePriceA"
+                                required
+                              />
+                              <div
+                                id="simplePriceAError"
+                                class="invalid-tooltip"
+                              ></div>
+                              <span
+                                class="input-group-text"
+                                id="simplePriceQuoteA"
+                                >USDT
+                              </span>
+                            </div>
+                            <!-- Price B -->
+                            <div
+                              class="mb-1 input-group input-group-sm position-relative"
+                            >
+                              <span class="input-group-text">Price B</span>
+                              <input
+                                tabindex="4"
+                                type="number"
+                                class="form-control form-control-sm input-focus"
+                                id="simplePriceB"
+                                placeholder="0.00"
+                                name="simplePriceB"
+                                step="0.01"
+                                disabled
+                              />
+                              <div
+                                id="simplePriceBError"
+                                class="invalid-tooltip"
+                              ></div>
+                              <span
+                                class="input-group-text"
+                                id="simplePriceQuoteB"
+                                >USDT
+                              </span>
+                            </div>
+                            <!-- Spread -->
+                            <div
+                              class="mb-1 input-group input-group-sm position-relative"
+                            >
+                              <span class="input-group-text">Spread</span>
+                              <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="simpleSpread"
+                                placeholder="0.00"
+                                name="simpleSpread"
+                                readonly
+                              />
+                              <span class="input-group-text" id="simpleSpread"
+                                >%
+                              </span>
+                            </div>
+                            <!-- Num Orders -->
+                            <div class="mb-1 input-group input-group-sm">
+                              <span class="input-group-text"># Orders</span>
+                              <select
+                                tabindex="5"
+                                class="form-select form-select-sm no-focus input-focus"
+                                aria-label="Select number of ladder orders"
+                                id="simpleNumOrders"
+                                name="simpleNumOrders"
+                                disabled
+                              >
+                                <option value="1" id="ladder1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                              </select>
+                            </div>
+                            <!-- Vol Shortcuts -->
+                            <div class="mb-1 input-group input-group-sm">
+                              <button
+                                data-vol-shortcut="0.05"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                5%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.10"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                10%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.25"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                25%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.5"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                50%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.75"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                75%
+                              </button>
+                              <button
+                                data-vol-shortcut="1"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                100%
+                              </button>
+                              <input
+                                tabindex="6"
+                                step="0.01"
+                                type="number"
+                                id="simpleVolCustom"
+                                name="simpleVolCustom"
+                                class="form-control border border-secondary input-focus"
+                                placeholder="0%"
+                              />
+                            </div>
+
+                            <div class="mb-1 input-group input-group-sm">
+                              <select
+                                tabindex="7"
+                                class="form-select form-select-sm pe-0 input-focus"
+                                aria-label="Select ladder order funding"
+                                id="simpleFundingType"
+                                name="simpleFundingType"
+                                disabled
+                              >
+                                <option value="total">Total</option>
+                                <option value="each">Each</option>
+                              </select>
+
+                              <input
+                                tabindex="8"
+                                type="number"
+                                class="form-control form-control-sm input-focus"
+                                id="simpleTotal"
+                                placeholder="0.00"
+                                step="0.01"
+                                name="simpleTotal"
+                                value="10"
+                                required
+                              />
+                              <span
+                                id="simpleTotalError"
+                                class="invalid-tooltip"
+                              >
+                              </span>
+
+                              <select
+                                tabindex="9"
+                                class="form-select form-select-sm no-focus pe-2 input-focus"
+                                aria-label="Select number of ladder orders"
+                                id="simpleFundingSrc"
+                                name="simpleFundingSrc"
+                              >
+                                <option id="simpleFundingSrcQ" value="quote">
+                                  USDT
+                                </option>
+                                <option id="simpleFundingSrcB" value="base">
+                                  BTC
+                                </option>
+                              </select>
+                            </div>
+
+                            <div class="mb-1 input-group input-group-sm">
+                              <span class="input-group-text">Approx ~=</span>
+                              <input
+                                type="number"
+                                id="simpleApproxBase"
+                                name="simpleApproxBase"
+                                class="form-control form-control-sm"
+                                min="0.00001"
+                                max="Infinity"
+                                step="0.00001"
+                                value="0"
+                              />
+                              <span
+                                id="simpleApproxBaseError"
+                                class="invalid-tooltip"
+                              >
+                              </span>
+                              <span
+                                id="simpleApproxBaseSymbol"
+                                class="input-group-text"
+                                >BTC</span
+                              >
+                            </div>
+
+                            <div class="mb-1 input-group input-group-sm">
+                              <span class="input-group-text">Approx ~=</span>
+                              <input
+                                type="number"
+                                id="simpleApproxQuote"
+                                name="simpleApproxQuote"
+                                class="form-control form-control-sm"
+                                value="0"
+                                min="5"
+                                max="Infinity"
+                                step="0.01"
+                              />
+                              <span
+                                id="simpleApproxQuoteError"
+                                class="invalid-tooltip"
+                              >
+                              </span>
+                              <span
+                                id="simpleApproxQuoteSymbol"
+                                class="input-group-text"
+                                >USDT</span
+                              >
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                              <button
+                                class="d-block btn btn-success no-focus"
+                                type="submit"
+                                id="simpleBuySubmit"
+                              >
+                                Buy
+                              </button>
+                              <button
+                                class="d-none btn btn-danger no-focus"
+                                type="submit"
+                                id="simpleSellSubmit"
+                              >
+                                Sell
+                              </button>
+                            </div>
+                          </fieldset>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Smart -->
+                  <div class="d-none" id="smartContainer">
+                    <!-- Select Side -->
+                    <div class="row mb-1">
+                      <div class="col">
+                        <div
+                          id="selectSmartBuyOrderToggle"
+                          class="d-grid gap-0 buy toggle selected"
+                        >
+                          <button
+                            id="selectSmartBuyOrder"
+                            class="btn btn-sm btn-link text-decoration-none text-success no-focus buy disableForm"
+                            disabled
+                          >
+                            Buy
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col pe-0">
+                        <div
+                          id="selectSmartSellOrderToggle"
+                          class="d-grid gap-0 sell toggle"
+                        >
+                          <button
+                            id="selectSmartSellOrder"
+                            class="btn btn-sm btn-link text-decoration-none text-danger no-focus sell disableForm"
+                            disabled
+                          >
+                            Sell
+                          </button>
+                        </div>
+                      </div>
+                      <div class="col-2 text-end ps-0 align-self-center">
+                        <button
+                          type="button"
+                          id="clearSmartForm"
+                          class="btn btn-sm btn-secondary no-focus py-0 mt-1 px-1 disableForm"
+                          disabled
+                        >
+                          X
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Order Details -->
+                    <div class="row">
+                      <div class="col">
+                        <form
+                          class="needs-validation"
+                          name="smartBuyOrder"
+                          id="smartForm"
+                          novalidate
+                        >
+                          <fieldset class="disableForm" disabled>
+                            <div>
+                              <input
+                                id="selectSmartSide"
+                                name="side"
+                                type="text"
+                                value="buy"
+                                hidden
+                              />
+                              <input
+                                class="currentSymbol"
+                                name="symbol"
+                                type="text"
+                                value="BTC_USDT"
+                                hidden
+                              />
+                              <input
+                                name="is_smart"
+                                type="text"
+                                value="true"
+                                hidden
+                              />
+                            </div>
+                            <!-- Trade Type -->
+                            <div class="input-group mb-1">
+                              <select
+                                tabindex="1"
+                                class="form-select form-select-sm no-focus input-focus"
+                                aria-label="Select ladder limit or single trade"
+                                id="smartTradeType"
+                                name="smartTradeType"
+                              >
+                                <option value="single">Single</option>
+                                <option value="ladder">Ladder Limit</option>
+                              </select>
+                              <!-- Order Type -->
+                              <select
+                                tabindex="2"
+                                class="form-select form-select-sm no-focus input-focus"
+                                aria-label="select limit order or market order"
+                                id="smartOrderType"
+                                name="smartOrderType"
+                              >
+                                <option value="limit">Limit</option>
+                                <option value="market">Market</option>
+                              </select>
+                            </div>
+
+                            <!-- Price A -->
+                            <div
+                              class="mb-1 input-group input-group-sm position-relative"
+                            >
+                              <span class="input-group-text">Price A</span>
+                              <input
+                                tabindex="3"
+                                type="number"
+                                class="form-control form-control-sm input-focus"
+                                id="smartPriceA"
+                                placeholder="0.00"
+                                step="0.01"
+                                name="smartPriceA"
+                                required
+                              />
+                              <div
+                                id="smartPriceAError"
+                                class="invalid-tooltip"
+                              ></div>
+                              <span
+                                class="input-group-text"
+                                id="smartPriceQuoteA"
+                                >USDT
+                              </span>
+                            </div>
+                            <!-- Price B -->
+                            <div
+                              class="mb-1 input-group input-group-sm position-relative"
+                            >
+                              <span class="input-group-text">Price B</span>
+                              <input
+                                tabindex="4"
+                                type="number"
+                                class="form-control form-control-sm input-focus"
+                                id="smartPriceB"
+                                placeholder="0.00"
+                                name="smartPriceB"
+                                step="0.01"
+                                disabled
+                              />
+                              <div
+                                id="smartPriceBError"
+                                class="invalid-tooltip"
+                              ></div>
+                              <span
+                                class="input-group-text"
+                                id="smartPriceQuoteB"
+                                >USDT
+                              </span>
+                            </div>
+                            <!-- Spread -->
+                            <div
+                              class="mb-1 input-group input-group-sm position-relative"
+                            >
+                              <span class="input-group-text">Spread</span>
+                              <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                id="smartSpread"
+                                placeholder="0.00"
+                                name="smartSpread"
+                                readonly
+                              />
+                              <span class="input-group-text">% </span>
+
+                              <!-- Num Orders -->
+                              <span class="input-group-text"># Orders</span>
+                              <select
+                                tabindex="5"
+                                class="form-select form-select-sm no-focus input-focus pe-0"
+                                aria-label="Select number of ladder orders"
+                                id="smartNumOrders"
+                                name="smartNumOrders"
+                                disabled
+                              >
+                                <option value="1" id="ladder1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                              </select>
+                            </div>
+
+                            <!-- TP Shortcuts -->
+                            <div class="mb-1 input-group input-group-sm">
+                              <button
+                                data-tp-shortcut="5"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus tpShortcut"
+                                type="button"
+                              >
+                                5%
+                              </button>
+                              <button
+                                data-tp-shortcut="10"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus tpShortcut"
+                                type="button"
+                              >
+                                10%
+                              </button>
+                              <button
+                                data-tp-shortcut="25"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus tpShortcut"
+                                type="button"
+                              >
+                                25%
+                              </button>
+                              <button
+                                data-tp-shortcut="50"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus tpShortcut"
+                                type="button"
+                              >
+                                50%
+                              </button>
+                              <button
+                                data-tp-shortcut="75"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus tpShortcut"
+                                type="button"
+                              >
+                                75%
+                              </button>
+                              <button
+                                data-tp-shortcut="100"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus tpShortcut border-end-0"
+                                type="button"
+                              >
+                                100%
+                              </button>
+                              <input
+                                tabindex="6"
+                                step="0.01"
+                                min="0.5"
+                                type="number"
+                                id="smartTpCustom"
+                                name="smartTpCustom"
+                                class="form-control border border-secondary input-focus"
+                                placeholder="TP 0%"
+                                required
+                              />
+                              <div
+                                id="smartTpCustomError"
+                                class="invalid-tooltip"
+                              ></div>
+                            </div>
+
+                            <!-- TP -->
+                            <div class="mb-1">
+                              <div class="row">
+                                <div class="col-8 pe-0">
+                                  <div
+                                    class="input-group input-group-sm position-relative"
+                                  >
+                                    <span class="input-group-text">TP</span>
+                                    <input
+                                      tabindex="7"
+                                      type="number"
+                                      class="form-control form-control-sm input-focus"
+                                      id="smartTP"
+                                      placeholder="0.00"
+                                      step="0.01"
+                                      name="smartTP"
+                                      required
+                                    />
+                                    <div
+                                      id="smartTPError"
+                                      class="invalid-tooltip"
+                                    ></div>
+                                    <span class="input-group-text">Price</span>
+                                  </div>
+                                </div>
+
+                                <div class="col align-self-center">
+                                  <span class="form-check">
+                                    <input
+                                      class="form-check-input"
+                                      type="checkbox"
+                                      value="true"
+                                      id="infSmartTrade"
+                                      name="infSmartTrade"
+                                    />
+                                    <label
+                                      class="form-check-label"
+                                      for="infSmartTrade"
+                                    >
+                                      Infinite?
+                                    </label>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- Vol Shortcuts -->
+                            <div class="mb-1 input-group input-group-sm">
+                              <button
+                                data-vol-shortcut="0.05"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                5%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.10"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                10%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.25"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                25%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.5"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                50%
+                              </button>
+                              <button
+                                data-vol-shortcut="0.75"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut"
+                                type="button"
+                              >
+                                75%
+                              </button>
+                              <button
+                                data-vol-shortcut="1"
+                                class="btn btn-sm btn-outline-secondary px-1 no-focus volShortcut border-end-0"
+                                type="button"
+                              >
+                                100%
+                              </button>
+                              <input
+                                tabindex="8"
+                                step="0.01"
+                                type="number"
+                                id="smartVolCustom"
+                                name="smartVolCustom"
+                                class="form-control border border-secondary input-focus"
+                                placeholder="0%"
+                              />
+                            </div>
+
+                            <div class="mb-1 input-group input-group-sm">
+                              <select
+                                tabindex="9"
+                                class="form-select form-select-sm pe-0 input-focus"
+                                aria-label="Select ladder order funding"
+                                id="smartFundingType"
+                                name="smartFundingType"
+                                disabled
+                              >
+                                <option value="total">Total</option>
+                                <option value="each">Each</option>
+                              </select>
+
+                              <input
+                                tabindex="10"
+                                type="number"
+                                class="form-control form-control-sm input-focus"
+                                id="smartTotal"
+                                placeholder="0.00"
+                                step="0.01"
+                                name="smartTotal"
+                                value="10"
+                                required
+                              />
+                              <span
+                                id="smartTotalError"
+                                class="invalid-tooltip"
+                              >
+                              </span>
+
+                              <select
+                                tabindex="11"
+                                class="form-select form-select-sm no-focus pe-2 input-focus"
+                                aria-label="Select number of ladder orders"
+                                id="smartFundingSrc"
+                                name="smartFundingSrc"
+                              >
+                                <option id="smartFundingSrcQ" value="quote">
+                                  USDT
+                                </option>
+                                <option id="smartFundingSrcB" value="base">
+                                  BTC
+                                </option>
+                              </select>
+                            </div>
+
+                            <div class="mb-1 input-group input-group-sm">
+                              <span class="input-group-text">Approx ~=</span>
+                              <input
+                                type="number"
+                                id="smartApproxBase"
+                                name="smartApproxBase"
+                                class="form-control form-control-sm"
+                                min="0.00001"
+                                max="Infinity"
+                                step="0.00001"
+                                value="0"
+                              />
+                              <span
+                                id="smartApproxBaseError"
+                                class="invalid-tooltip"
+                              >
+                              </span>
+                              <span
+                                id="smartApproxBaseSymbol"
+                                class="input-group-text"
+                                >BTC</span
+                              >
+                            </div>
+
+                            <div class="mb-1 input-group input-group-sm">
+                              <span class="input-group-text">Approx ~=</span>
+                              <input
+                                type="number"
+                                id="smartApproxQuote"
+                                name="smartApproxQuote"
+                                class="form-control form-control-sm"
+                                value="0"
+                                min="5"
+                                max="Infinity"
+                                step="0.01"
+                              />
+                              <span
+                                id="smartApproxQuoteError"
+                                class="invalid-tooltip"
+                              >
+                              </span>
+                              <span
+                                id="smartApproxQuoteSymbol"
+                                class="input-group-text"
+                                >USDT</span
+                              >
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                              <button
+                                class="d-block btn btn-success no-focus"
+                                type="submit"
+                                id="smartBuySubmit"
+                              >
+                                Buy
+                              </button>
+                              <button
+                                class="d-none btn btn-danger no-focus"
+                                type="submit"
+                                id="smartSellSubmit"
+                              >
+                                Sell
+                              </button>
+                            </div>
+                          </fieldset>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current/History -->
+          <div class="row mt-2" id="currentHistoryContainer">
+            <!-- Current -->
+            <div class="d-none d-xxl-block col-xxl-9">
+              <!-- Header -->
+              <div class="row">
+                <div class="col">
+                  <div class="hstack gap-3 text-secondary">
+                    <div>
+                      <a
+                        type="button"
+                        class="text-light text-decoration-none"
+                        id="viewActiveOrders"
+                      >
+                        Active
+                      </a>
+                    </div>
+                    <div>
+                      <a
+                        type="button"
+                        class="text-secondary text-decoration-none"
+                        id="viewClosedOrders"
+                      >
+                        Closed
+                      </a>
+                    </div>
+                    <div>
+                      <a
+                        type="button"
+                        class="text-secondary text-decoration-none"
+                        id="viewWallets"
+                      >
+                        Wallets
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="col text-end">
+                  <span
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                    title="Checks for new updates on spreadsheet. The backend updates the spreadsheet every 5 minutes."
+                    >Refresh:</span
+                  >
+                  <span id="refresh">60</span>
+                  <span>Total:</span>
+                  <span id="ordersTotal">0</span>
+                </div>
+              </div>
+              <div class="col border-bottom"></div>
+              <!-- Body -->
+              <div class="row bitUtilityScroll" id="currentOrdersContainer">
+                <div class="col">
+                  <div id="activeOrdersContainer" class="d-none">
+                    <table
+                      class="table table-dark table-striped table-hover table-sm table-borderless"
+                    >
+                      <thead>
+                        <tr class="sticky-top">
+                          <th scope="col">Select</th>
+                          <th scope="col">Created</th>
+                          <th scope="col">Symbol</th>
+                          <th scope="col">Side</th>
+                          <th scope="col">Price</th>
+                          <th scope="col">Filled</th>
+                          <th scope="col">Quote</th>
+                          <th scope="col">Smart?</th>
+                          <th
+                            scope="col"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="BP = Base order is placed ||
+                            TP = Base order filled. TP Placed"
+                          >
+                            Step
+                          </th>
+                          <th
+                            scope="col"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            title="Base Price/Take Profit"
+                          >
+                            BP/TP
+                          </th>
+                          <th scope="col">
+                            <div class="dropdown">
+                              <button
+                                class="btn btn-sm btn-danger dropdown-toggle p-0 no-focus"
+                                type="button"
+                                id="cancelActions"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                              >
+                                X
+                              </button>
+                              <ul
+                                class="dropdown-menu dropdown-menu-dark"
+                                aria-labelledby="cancelActions"
+                              >
+                                <li>
+                                  <button
+                                    type="button"
+                                    id="cancelBuyActive"
+                                    class="dropdown-item"
+                                  >
+                                    Buys
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    type="button"
+                                    id="cancelSellActive"
+                                    class="dropdown-item"
+                                  >
+                                    Sells
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    type="button"
+                                    id="cancelAllActive"
+                                    class="dropdown-item"
+                                  >
+                                    All
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    type="button"
+                                    id="cancelAllSelected"
+                                    class="dropdown-item"
+                                  >
+                                    Selected
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody id="activeOrdersTable"></tbody>
+                    </table>
+                  </div>
+                  <div
+                    id="noActiveOrdersContainer"
+                    class="d-none text-secondary mt-5"
+                  >
+                    No active orders for this pair.
+                  </div>
+                  <div id="closedOrdersContainer" class="d-none">
+                    <table
+                      class="table table-dark table-striped table-hover table-sm table-borderless"
+                    >
+                      <thead>
+                        <tr class="sticky-top">
+                          <th scope="col">Created</th>
+                          <th scope="col">Symbol</th>
+                          <th scope="col">Side</th>
+                          <th scope="col">Price</th>
+                          <th scope="col">Filled</th>
+                          <th scope="col">Quote</th>
+                        </tr>
+                      </thead>
+                      <tbody id="closedOrdersTable"></tbody>
+                    </table>
+                  </div>
+                  <div
+                    id="noClosedOrdersContainer"
+                    class="d-none text-secondary mt-5"
+                  >
+                    No closed orders for this pair.
+                  </div>
+                  <div id="walletsContainer" class="d-none">
+                    <table
+                      class="table table-dark table-striped table-hover table-sm table-borderless"
+                    >
+                      <thead>
+                        <tr class="sticky-top">
+                          <th scope="col">Name</th>
+                          <th scope="col">Currency</th>
+                          <th scope="col">Available</th>
+                          <th scope="col">Frozen</th>
+                        </tr>
+                      </thead>
+                      <tbody id="walletsTable"></tbody>
+                    </table>
+                  </div>
+                  <div
+                    id="noWalletsContainer"
+                    class="d-none text-secondary mt-5"
+                  >
+                    No wallets found.
+                  </div>
+                  <div id="ordersLoading" class="mt-5"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- History -->
+            <div class="d-none d-xxl-block col-xxl-3">
+              <!-- Header -->
+              <div class="row">
+                <div class="col">
+                  <div>Trade History</div>
+                  <div class="col border-bottom"></div>
+                </div>
+              </div>
+              <!-- Body -->
+              <div class="row bitUtilityScroll" id="tradeHistoryContainer">
+                <div class="col">
+                  <div>
+                    <table
+                      class="table table-dark table-sm table-hover table-borderless"
+                    >
+                      <thead>
+                        <tr class="sticky-top">
+                          <th scope="col" class="pt-2 text-start">Price</th>
+                          <th scope="col" class="pt-2">Quantity</th>
+                          <th scope="col" class="pt-2 text-end">Time</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tradeHistoryTable"></tbody>
+                    </table>
+                    <div id="tradeHistoryLoading"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OrderBook -->
+        <div class="col-2 d-none d-xxl-block mt-2" id="orderBookContainer">
+          <!-- Header -->
+          <div class="row">
+            <div class="col">
+              <div class="border-bottom">OrderBook</div>
+            </div>
+          </div>
+          <!-- Body -->
+          <div class="row">
+            <div class="col">
+              <div
+                class="row bitUtilityScroll d-flex flex-column-reverse"
+                id="askOrderBookContainer"
+              >
+                <div class="col">
+                  <div>
+                    <table
+                      class="table table-sm table-dark table-hover table-borderless mb-0"
+                    >
+                      <thead>
+                        <tr class="sticky-top">
+                          <th scope="col" class="col-4 text-start">Price</th>
+                          <th scope="col" class="col-4">Quantity</th>
+                          <th scope="col" class="col-4 text-end">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody id="askOrderBookTable"></tbody>
+                    </table>
+                    <div id="orderBookAskLoading"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col border-bottom"></div>
+              <div class="row my-1" id="orderBookSpreadContainer">
+                <div class="col text-start pe-0">
+                  <div>
+                    <span
+                      id="orderBookSpread"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="right"
+                      title="Spread"
+                      class="d-inline-block text-truncate-left"
+                      >0</span
+                    >
+                  </div>
+                </div>
+                <div class="col text-end ps-0">
+                  <div>
+                    <span
+                      id="orderBookLast"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="left"
+                      title="Last Trade"
+                      class="d-inline-block text-truncate-left"
+                      >0</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="col border-bottom"></div>
+              <div class="row bitUtilityScroll" id="bidOrderBookContainer">
+                <div class="col">
+                  <div>
+                    <table
+                      class="table table-sm table-dark table-hover table-borderless mt-0"
+                    >
+                      <tbody id="bidOrderBookTable"></tbody>
+                    </table>
+                    <div id="orderBookBidLoading"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toasts -->
+      <div aria-live="polite" aria-atomic="true">
+        <div
+          id="toasts"
+          class="toast-container position-absolute end-0 pe-2"
+        ></div>
+      </div>
+      <!-- Import -->
+      <div aria-live="polite" aria-atomic="true">
+        <div
+          id="importStatus"
+          class="toast-container position-absolute end-0 pe-2"
+        >
+          <div
+            class="toast bg-dark border border-primary"
+            data-bs-autohide="false"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            id="importToast"
+          >
+            <div
+              class="toast-header bg-dark border border-primary border-bottom-1 border-start-0 border-top-0 border-end-0"
+            >
+              <div class="accordion accordion-flush" id="importAccordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="flush-headingOne">
+                    <button
+                      class="accordion-button bg-dark p-0 no-focus"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#importCollapse"
+                      aria-expanded="true"
+                      aria-controls="importCollapse"
+                    >
+                      <span class="vstack gap-1">
+                        <strong class="me-auto text-light">
+                          <span>Importing:</span>
+                        </strong>
+
+                        <span class="progress ms-3 w-75">
+                          <span
+                            id="importProgress"
+                            class="progress-bar bg-dark progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            aria-valuenow="0"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            style="width: 0%"
+                          ></span>
+                        </span>
+
+                        <div class="text-warning">
+                          Keep this page open. Don't place orders while
+                          importing, wait until the import completes.
+                        </div>
+                      </span>
+                    </button>
+                  </h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                id="userCancelImport"
+                class="btn-close btn-close-white"
+                data-bs-toggle="modal"
+                data-bs-target="#cancelImport"
+              ></button>
+            </div>
+            <div
+              id="importCollapse"
+              class="accordion-collapse collapse show"
+              aria-labelledby="flush-headingOne"
+              data-bs-parent="#importAccordion"
+            >
+              <div class="accordion-body">
+                <div
+                  id="importResults"
+                  class="toast-body text-light bitUtilityScroll"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <?!= include("global-js"); ?>
+    <?!= include("tradingview-js"); ?>
+    <?!= include("trade-js"); ?>
+  </body>
+</html>

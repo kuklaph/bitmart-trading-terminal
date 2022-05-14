@@ -1,0 +1,1190 @@
+<script>
+  //On Start
+  $(document).ready(async () => {
+    //Start
+    ScannerUtility.Page.addEventListeners();
+
+    RestAPI.init();
+    setInterval(() => {
+      ScannerTable.Init.update();
+    }, 3000);
+
+    //Scroll
+    ScannerUtility.Page.scroll();
+  });
+
+  //Datastore ================================
+  const StoredData = {
+    symbols: [],
+    rowObjects: {},
+    quickView: {
+      loading: false,
+      currentPage: 1,
+      maxPage: 0,
+      selectedTable: "t1",
+      favorites: {
+        loading: false,
+        saved: [],
+        paginated: {},
+        currentPage: 1,
+        maxPage: 0,
+        openLinkPagination: 20,
+      },
+    },
+    quote: "All",
+    t1: {
+      sort: {
+        type: "Spread",
+        direction: true,
+      },
+      data: [],
+      selected: [],
+    },
+    t2: {
+      sort: {
+        type: "Spread",
+        direction: true,
+      },
+      data: [],
+      selected: [],
+    },
+    t3: {
+      sort: {
+        type: "Spread",
+        direction: true,
+      },
+      data: [],
+      selected: [],
+    },
+  };
+
+  //Rest ================================
+  const RestAPI = {
+    init: () => {
+      Utility.Page.loading("marketStatus", true, "center", "small", true);
+      Utility.Server.run()
+        .withSuccessHandler((T) => {
+          if (T.error) {
+            Utility.Page.loading("marketStatus", false);
+            throw T;
+          }
+          if (!T.result.data.symbols.length) {
+            console.log(T);
+            return;
+          }
+          StoredData.symbols = T.result.data.symbols;
+          StoredDataController.init();
+          RestAPI.update();
+        })
+        .withFailureHandler((err) => {
+          Utility.Page.loading("marketStatus", false);
+          console.log(err);
+          ScannerUtility.Page.updateStatus(true);
+        })
+        .Bitmart("Markets", "getSymbolDetails");
+    },
+    update: () => {
+      Utility.Server.run()
+        .withSuccessHandler((raw) => {
+          Utility.Page.loading("marketStatus", false);
+          const { result, error } = raw;
+          if (error) {
+            throw result;
+          }
+          const { tickers } = result.data;
+          tickers.forEach((t) => {
+            StoredDataController.update([t]);
+          });
+          RestAPI.initStatus();
+          //ScannerWebSocket.init();
+        })
+        .withFailureHandler((err) => {
+          console.log(err);
+          RestAPI.initStatus(true);
+        })
+        .Bitmart("Markets", "getTicker");
+    },
+    initStatus: (isError = false) => {
+      const status = document.getElementById("marketStatus");
+      if (isError) {
+        status.innerText = "Error";
+        status.style.color = "red";
+        return;
+      }
+      status.innerText = "Rest Only";
+      status.style.color = "gold";
+      let time = new Date().toLocaleTimeString();
+      document.getElementById(
+        "lastUpdated"
+      ).innerHTML = `Last Updated: ${time}`;
+    },
+  };
+
+  //Websocket ================================
+  const ScannerWebSocket = {
+    WS: {},
+    topic: "ticker",
+    init: () => {},
+    connect: () => {
+      const topic = ScannerWebSocket.topic;
+      const url = "wss://ws-manager-compress.bitmart.com/api?protocol=1.1";
+      let ws = new WebSocket(url);
+      ScannerWebSocket.ws[topic] = ws;
+      ScannerWebSocket.ws[topic].readyState = ws.readyState;
+      ScannerUtility.Page.updateStatus();
+      ws.addEventListener("open", () => {
+        console.log("Connecting to Bitmart Tickers..");
+        ScannerWebSocket.ws[topic].heartbeat = setInterval(
+          ScannerWebSocket.socketHeartBeat,
+          19000,
+          topic
+        );
+        ScannerWebSocket.subscribe();
+      });
+      ws.addEventListener("error", (error) => {
+        ScannerWebSocket.handleSocketError(error);
+        console.log(error, "event");
+      });
+      ws.addEventListener("ping", () => {
+        console.log("test");
+      });
+      ws.addEventListener("close", () => {
+        clearInterval(ScannerWebSocket.ws[topic].heartbeat);
+        console.log(topic + " websocket closed...reconnecting");
+      });
+    },
+    subscribe: async () => {
+      const topic = ScannerWebSocket.topic;
+      const ws = ScannerWebSocket.ws[topic];
+      const topicTickers = ScannerWebSocket.symbols
+        //const topicTickers = [`spot/ticker:BTC_USDT`];
+        .filter((f) => {
+          return f.trade_status == "trading";
+        })
+        .map((s) => {
+          return `spot/ticker:${s.symbol}`;
+        });
+      //console.log(topicTickers.length);
+      const chunkedTickers = Utility.Data.chunk(topicTickers, 20);
+      for (const key in chunkedTickers) {
+        if (Object.hasOwnProperty.call(chunkedTickers, key)) {
+          const element = chunkedTickers[key];
+          const subscribeParams = { op: "subscribe", args: element };
+          console.log(subscribeParams);
+          ws.send(JSON.stringify(subscribeParams));
+          await Utility.sleep(100);
+        }
+      }
+      ws.addEventListener("message", ScannerWebSocket.handleMessage);
+    },
+    socketHeartBeat: () => {
+      const topic = ScannerWebSocket.topic;
+      const ws = ScannerWebSocket.ws[topic];
+      ws.send("ping");
+    },
+    handleSocketError: (error) => {
+      console.log("err");
+      console.log(
+        "WebSocket error: " +
+          (error.code ? " (" + error.code + ")" : "") +
+          (error.message ? " " + error.message : "")
+      );
+    },
+    handleMessage: async (compressed) => {
+      //console.log(compressed.data);
+      if (typeof compressed.data == "object") {
+        const stream = compressed.data.stream();
+        const reader = stream.getReader();
+        const read = await reader.read();
+        if (!read.done) {
+          const enc = new TextDecoder("utf-8");
+          const decoded = enc.decode(pako.inflateRaw(read.value));
+          const parsed = JSON.parse(decoded);
+          StoredDataController.update(parsed.data);
+        }
+      } else {
+        //console.log(compressed.data);
+        if (compressed.data !== "pong") {
+          console.log(compressed.data);
+          const msg = compressed.data;
+          StoredDataController.update(JSON.parse(msg).data);
+        }
+      }
+    },
+  };
+
+  // IDS ================================
+  const scannerTableBody1 = document.getElementById("scannerTableBody_t1");
+  const scannerTableBody2 = document.getElementById("scannerTableBody_t2");
+  const scannerTableBody3 = document.getElementById("scannerTableBody_t3");
+  const quickViewBody = document.getElementById("quickViewBody");
+  const favoritesBody = document.getElementById("favoritesBody");
+
+  // Table ================================
+  const ScannerTable = {
+    Init: {
+      update: () => {
+        const { rowObjects, quote } = StoredData;
+        const filterRowsByQuote = ScannerTable.Init.filterByQuote(
+          rowObjects,
+          quote
+        );
+        const spreadTables =
+          ScannerTable.Init.filterBySpread(filterRowsByQuote);
+        ScannerTable.Init.sortAndSave(spreadTables);
+        ScannerTable.Init.append();
+      },
+      filterByQuote: (rowObjects, quote) => {
+        const convertToArray = Object.keys(rowObjects).map((r) => {
+          return rowObjects[r];
+        });
+        const filteredRows =
+          quote == "All"
+            ? convertToArray
+            : convertToArray.filter((el) => {
+                return el.Q == quote;
+              });
+        return filteredRows;
+      },
+      filterBySpread: (rowObjects) => {
+        const tables = {
+          t1: [],
+          t2: [],
+          t3: [],
+        };
+        rowObjects.forEach((r) => {
+          const spread = Number(r.LvH);
+          if (spread > 20) {
+            tables.t1.push(r);
+          }
+          if (spread > 10 && spread <= 20) {
+            tables.t2.push(r);
+          }
+          if (spread >= 0 && spread <= 10) {
+            tables.t3.push(r);
+          }
+        });
+        return tables;
+      },
+      sortAndSave: (unSortedTables) => {
+        const sortedTables = Object.keys(unSortedTables).forEach((table) => {
+          const { type, direction } = StoredData[table].sort;
+          const sorted = Utility.Data.sorts(
+            unSortedTables[table],
+            type,
+            direction
+          );
+          StoredData[table].data = sorted;
+        });
+      },
+      append: () => {
+        const { t1, t2, t3 } = StoredData;
+        [t1, t2, t3].forEach((table, i) => {
+          const tableElement = document.getElementById(
+            `scannerTableBody_t${i + 1}`
+          );
+          table.data.forEach((row) => {
+            const coin = row.S;
+            const coinExists = document.getElementById(`${coin}_mt`);
+            ScannerTable.Init.convertToHtmlRow(row, tableElement, coinExists);
+          });
+        });
+      },
+      convertToHtmlRow: (rowObj, tableElement, isUpdate = false) => {
+        const { S, H, L, O, C, NL, LvH, QV, URL } = rowObj;
+
+        if (!isUpdate) {
+          const rowHeader = document.createElement("th");
+          rowHeader.setAttribute("scope", "row");
+          rowHeader.setAttribute("class", "coin");
+
+          const a = document.createElement("a");
+          a.setAttribute("href", URL);
+          a.setAttribute("target", "_blank");
+          a.setAttribute("class", "has-coin-name-url");
+          a.setAttribute("id", `${S}_mt`);
+          a.innerText = S;
+          rowHeader.appendChild(a);
+
+          const tableRow = document.createElement("tr");
+          tableRow.appendChild(rowHeader);
+
+          const high = document.createElement("td");
+          high.innerText = H;
+          high.setAttribute("id", `${S}_high`);
+          const low = document.createElement("td");
+          low.innerText = L;
+          low.setAttribute("id", `${S}_low`);
+          const last = document.createElement("td");
+          last.innerText = C;
+          last.setAttribute("id", `${S}_last`);
+          const open = document.createElement("td");
+          open.innerText = O;
+          open.setAttribute("id", `${S}_open`);
+          const nearL = document.createElement("td");
+          nearL.innerText = `${NL}%`;
+          nearL.setAttribute("id", `${S}_nearL`);
+          const spread = document.createElement("td");
+          spread.innerText = `${LvH}%`;
+          spread.setAttribute("id", `${S}_spread`);
+          const qVol = document.createElement("td");
+          qVol.innerText = QV;
+          qVol.setAttribute("id", `${S}_qVol`);
+
+          const appends = [high, low, last, open, nearL, spread, qVol];
+
+          appends.forEach((a) => {
+            tableRow.append(a);
+          });
+
+          tableElement.append(tableRow);
+        } else {
+          const high = document.getElementById(`${S}_high`);
+          high.innerText = H;
+          const low = document.getElementById(`${S}_low`);
+          low.innerText = L;
+          const open = document.getElementById(`${S}_open`);
+          open.innerText = O;
+          const last = document.getElementById(`${S}_last`);
+          last.innerText = C;
+          const nearL = document.getElementById(`${S}_nearL`);
+          nearL.innerText = `${NL}%`;
+          const spread = document.getElementById(`${S}_spread`);
+          spread.innerText = `${LvH}%`;
+          const qVol = document.getElementById(`${S}_qVol`);
+          qVol.innerText = QV;
+        }
+      },
+    },
+    User: {
+      filterByQuote: (event = false) => {
+        let filterQuote;
+        if (event) {
+          filterQuote = event.srcElement.innerText;
+          StoredData.quote = filterQuote;
+        } else {
+          filterQuote = StoredData.quote;
+        }
+        document.getElementById("filterByQuoteContainer").innerText =
+          filterQuote;
+        [scannerTableBody1, scannerTableBody2, scannerTableBody3].forEach(
+          (t) => {
+            t.innerHTML = "";
+          }
+        );
+      },
+      filterByColumn: (event) => {
+        const tables = {
+          t1: scannerTableBody1,
+          t2: scannerTableBody2,
+          t3: scannerTableBody3,
+        };
+        const clickedElement = event.target.id.split("_")[1];
+        const table = tables[clickedElement];
+        const col = event.target.innerText;
+
+        StoredData[clickedElement].sort.type = col;
+        StoredData[clickedElement].sort.direction
+          ? (StoredData[clickedElement].sort.direction = false)
+          : (StoredData[clickedElement].sort.direction = true);
+        table.innerHTML = "";
+      },
+    },
+  };
+
+  // QuickView ================================
+  const QuickView = {
+    charts: {
+      init: (load = true) => {
+        quickViewBody.innerHTML = "";
+        const chunked = QuickView.charts.chunkedTableData();
+        QuickView.charts.fetchKlineData(chunked);
+        if (load) {
+          QuickView.links.loadFavLinks();
+        }
+      },
+      chunkedTableData: () => {
+        const { selectedTable, currentPage } = StoredData.quickView;
+        const { data } = StoredData[selectedTable];
+        const chunked = Utility.Data.chunk(data, 20);
+        QuickView.charts.addChartPagesToOptionalSelect(chunked);
+        const maxPage = Object.keys(chunked).length;
+        StoredData.quickView.maxPage = maxPage;
+        document.getElementById(
+          "currentChartPage"
+        ).innerText = `Page ${currentPage} : ${maxPage}`;
+        return chunked;
+      },
+      addChartPagesToOptionalSelect: (paginated) => {
+        const div = document.createElement("div");
+        let html = "";
+        if (Object.keys(paginated).length > 0) {
+          for (const key in paginated) {
+            if (Object.hasOwnProperty.call(paginated, key)) {
+              html += `<button class="dropdown-item">${key}</button>`;
+            }
+          }
+        } else {
+          html += `<button class="dropdown-item">1</button>`;
+        }
+        document.getElementById("optionalChartPageSelection").innerHTML = html;
+      },
+      updateChartPageSelection: (event) => {
+        const { currentPage, maxPage, loading } = StoredData.quickView;
+        if (loading) {
+          return;
+        }
+        const selected = Number(event.target.innerText);
+        if (currentPage == selected) {
+          return;
+        }
+        StoredData.quickView.currentPage = selected;
+        document.getElementById(
+          "currentChartPage"
+        ).innerText = ` Page ${selected} : ${maxPage}`;
+        QuickView.charts.init();
+      },
+      fetchKlineData: (chunked) => {
+        const { currentPage } = StoredData.quickView;
+        const selectedCoins = chunked[currentPage].map((r) => {
+          return r.S;
+        });
+        if (!selectedCoins.length) {
+          return;
+        }
+        Utility.Page.loading("modalLoading", true);
+        StoredData.quickView.loading = true;
+        Utility.Server.run()
+          .withSuccessHandler((klineData) => {
+            QuickView.charts.appendToTable(chunked[currentPage], klineData);
+            Utility.Page.loading("modalLoading", false);
+            StoredData.quickView.loading = false;
+          })
+          .withFailureHandler(() => {
+            Utility.Page.loading("modalLoading", false);
+            StoredData.quickView.loading = false;
+          })
+          .fetchKlinesForQuickview(selectedCoins);
+      },
+      appendToTable: (chunked, klineData) => {
+        chunked.forEach((row) => {
+          const updatedRow = QuickView.charts.calculateAvgVol(row, klineData);
+          QuickView.charts.createHtmlRow(updatedRow);
+        });
+        QuickView.charts.addKlineChart(klineData);
+      },
+      calculateAvgVol: (rowObj, klineData) => {
+        const { S } = rowObj;
+        const [matched] = klineData.filter((k) => {
+          return k.symbol == S;
+        });
+        if (!matched) {
+          rowObj.AV = 0;
+        }
+
+        const { kline } = matched;
+        const chunkTo24H = Utility.Data.chunk(kline, 24);
+        const totalChunks = Object.keys(chunkTo24H).map((c) => {
+          return chunkTo24H[c].reduce((acc, el) => {
+            return (acc += el.quote_volume);
+          }, 0);
+        });
+        const count = totalChunks.length;
+        const total = totalChunks.reduce((total, day) => {
+          return (total += day);
+        }, 0);
+        const avg = total / count;
+        rowObj.AV = `${Number(avg.toFixed(2))}-${count}D`;
+        return rowObj;
+      },
+      createHtmlRow: (rowObj, klineData) => {
+        const { S, H, L, O, C, NL, LvH, QV, URL, AV } = rowObj;
+        const createElements = {
+          createMetaHTML: () => {
+            const quoteVol = Number(QV);
+            const avgVol = AV.split("-")[0];
+            const avgTime = AV.split("-")[1];
+            const volCol =
+              Number(quoteVol) > Number(avgVol)
+                ? "text-success"
+                : "text-danger";
+            const createMetaTableRow = document.createElement("tr");
+            const metaTableTDTemplate = `
+          <td colspan="9" id="${S}_qv_metaData_cell">
+            <table
+              class="table table-borderless mb-0 text-white"
+              id="${S}_qv_metaData_table"
+            >
+              <thead class="thead-inverse text-white">
+                <tr>
+                  <th>Coin</th>
+                  <th>24h High</th>
+                  <th>24h Low</th>
+                  <th>24h Open</th>
+                  <th>24h Last</th>
+                  <th>Near 24-L</th>
+                  <th>24h Spread</th>
+                  <th>24h Q Vol</th>
+                  <th>${avgTime} Avg Vol</th>
+                </tr>
+              </thead>
+              <tbody class="text-white">
+                <tr>
+                  <th scope="row" class="coin">
+                    <span>
+                      <button type="button" class="btn btn-sm btn-outline-info me-1" id="${S}_addToFavorites">
+                        +
+                      </button>
+                    </span>
+                    <span>
+                      <a
+                        href="${URL}"
+                        target="_blank"
+                        class="has-coin-name-url"
+                        id="${S}_qv"
+                      >
+                        ${S}
+                      </a>
+                    </span>
+                  </th>
+                  <td>${H}</td>
+                  <td>${L}</td>
+                  <td>${C}</td>
+                  <td>${O}</td>
+                  <td>${NL}%</td>
+                  <td>${LvH}%</td>
+                  <td class="${volCol}">${QV}</td>
+                  <td>${avgVol}</td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+          `;
+            createMetaTableRow.innerHTML = metaTableTDTemplate;
+            quickViewBody.append(createMetaTableRow);
+          },
+          createChartRow: () => {
+            const chartTableRow = document.createElement("tr");
+            const chartTD = `
+            <td colspan="9" class="border-bottom" id="${S}_qv_chart_row"></td>
+          `;
+            chartTableRow.innerHTML = chartTD;
+            quickViewBody.append(chartTableRow);
+          },
+        };
+
+        createElements.createMetaHTML();
+        createElements.createChartRow();
+      },
+      addKlineChart: (klineData) => {
+        klineData.forEach((klineObj) => {
+          const symbolId = document.getElementById(
+            `${klineObj.symbol}_qv_chart_row`
+          );
+          const [getPrecision] = StoredData.symbols.filter((f) => {
+            return f.symbol == klineObj.symbol;
+          });
+          const precision = getPrecision.price_max_precision;
+          //const avgVolumeId
+          const width = $(symbolId).width();
+          const modalHeight = $("#quickViewModal").height();
+          const height = Math.floor(modalHeight * 0.33);
+          const div = document.createElement("div");
+          const chart = LightweightCharts.createChart(div, {
+            width,
+            height,
+            layout: {
+              backgroundColor: "#212529",
+              textColor: "#ffffff",
+            },
+            rightPriceScale: {},
+            grid: {
+              horzLines: {
+                color: "#000",
+              },
+              vertLines: {
+                color: "#000",
+              },
+            },
+            crosshair: {
+              vertLine: {
+                visible: false,
+              },
+              horzLine: {
+                visible: false,
+              },
+              mode: 0,
+            },
+            timeScale: {
+              timeVisible: true,
+              secondsVisible: true,
+            },
+          });
+
+          let minMove = "0.";
+          for (let index = 0; index < precision; index++) {
+            minMove += index < precision - 1 ? "0" : "1";
+          }
+          const priceFmt = {
+            priceFormat: {
+              type: "custom",
+              formatter: (price) => {
+                return price.toFixed(precision);
+              },
+              precision,
+              minMove,
+            },
+          };
+          const candlestickSeries = chart.addCandlestickSeries(priceFmt);
+          candlestickSeries.setData(klineObj.kline);
+          chart.timeScale().fitContent();
+          symbolId.appendChild(div);
+        });
+      },
+      changeTableSource: (event) => {
+        const { loading } = StoredData.quickView;
+        if (loading) {
+          return;
+        }
+        const userSelection = event.target.innerText;
+        const options = {
+          "> 20%": "t1",
+          "10 - 20%": "t2",
+          "0 - 10%": "t3",
+        };
+        const selectedTable = options[userSelection];
+        StoredData.quickView.selectedTable = selectedTable;
+        document.getElementById(
+          "quickViewSpreadTableContainer"
+        ).innerText = ` Spread ${userSelection} `;
+        StoredData.quickView.currentPage = 1;
+        QuickView.charts.init();
+      },
+      changeChartPage: (event) => {
+        const selection = event.target.id;
+        const { currentPage, maxPage, loading } = StoredData.quickView;
+        const actions = {
+          nextChartPageContainer: () => {
+            if (currentPage == maxPage) {
+              return;
+            }
+            if (loading) {
+              return;
+            }
+            const updated = currentPage + 1;
+            StoredData.quickView.currentPage = updated;
+            QuickView.charts.init(false);
+          },
+          prevChartPageContainer: () => {
+            if (currentPage == 1) {
+              return;
+            }
+            if (loading) {
+              return;
+            }
+            const updated = currentPage - 1;
+            StoredData.quickView.currentPage = updated;
+            QuickView.charts.init(false);
+          },
+        };
+        actions[selection]();
+      },
+    },
+    links: {
+      addFavorite: (event) => {
+        const selected = event.target.id;
+        if (!selected.includes("_addToFavorites")) {
+          return;
+        }
+        const { saved, openLinkPagination } = StoredData.quickView.favorites;
+        const symbol = selected.split("_addToFavorites")[0];
+        const [favoriteExists] = saved.filter((f) => {
+          return f.S == symbol;
+        });
+        if (favoriteExists) {
+          return;
+        }
+        const symbolDetails = StoredData.rowObjects[symbol];
+        saved.push({ S: symbolDetails.S, URL: symbolDetails.URL });
+        QuickView.links.paginateLinksFromObjects(saved, openLinkPagination);
+        QuickView.links.appendToFavoritesList();
+        QuickView.links.addLinkPagesToOptionalSelect();
+        QuickView.links.updateTotalFavorites();
+      },
+      removeFavorite: (event) => {
+        const selected = event.target.id;
+        if (!selected.includes("_removeFavorite")) {
+          return;
+        }
+        const { saved, openLinkPagination } = StoredData.quickView.favorites;
+        const removed = selected.split("_removeFavorite")[0];
+        const filterFavorites = saved.filter((f) => {
+          return f.S !== removed;
+        });
+        StoredData.quickView.favorites.saved = filterFavorites;
+        QuickView.links.paginateLinksFromObjects(
+          filterFavorites,
+          openLinkPagination
+        );
+        QuickView.links.appendToFavoritesList();
+        QuickView.links.addLinkPagesToOptionalSelect();
+        QuickView.links.updateTotalFavorites();
+      },
+      appendToFavoritesList: () => {
+        const { paginated } = StoredData.quickView.favorites;
+        const createElements = {
+          createAccordion: () => {
+            const favAccId = document.getElementById("favAccordion");
+            favAccId.innerHTML = "";
+            for (const page in paginated) {
+              if (Object.hasOwnProperty.call(paginated, page)) {
+                StoredData.quickView.favorites.currentPage = page;
+                const checkID = document.getElementById(
+                  `favAccPageBody_${page}`
+                );
+                if (!checkID) {
+                  const accordionItemDiv = document.createElement("div");
+                  accordionItemDiv.setAttribute("class", "accordion-item");
+                  const accordionItemHTML = `
+                  <h2 class="accordion-header" id="favAccPageHeader_${page}">
+                    <button
+                      class="accordion-button text-white"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#favAccCollapse_${page}"
+                      aria-expanded="true"
+                      aria-controls="favAccCollapse_${page}"
+                    >
+                      Page ${page}
+                    </button>
+                  </h2>
+
+                  <div
+                    id="favAccCollapse_${page}"
+                    class="accordion-collapse collapse"
+                    aria-labelledby="favAccPageHeader_${page}"
+                    data-bs-parent="#favAccordion"
+                  >
+                    <div class="accordion-body" id="favAccPageBody_${page}">
+                    </div>
+                  </div>
+                  `;
+                  accordionItemDiv.innerHTML = accordionItemHTML;
+                  favAccId.append(accordionItemDiv);
+                }
+              }
+            }
+          },
+          appendFavLinks: () => {
+            for (const page in paginated) {
+              if (Object.hasOwnProperty.call(paginated, page)) {
+                const saved = paginated[page];
+                const checkID = document.getElementById(
+                  `favAccPageBody_${page}`
+                );
+                const htmlAlerts = saved.reduce((s, f) => {
+                  return (s += `
+                <div class="alert alert-dark alert-sm alert-dismissible fade show mb-1 p-1" role="alert" id="${f.S}_alertContainer">${f.S}
+                  <button
+                    type="button"
+                    class="btn-close p-2"
+                    data-bs-dismiss="alert"
+                    aria-label="Close"
+                    id="${f.S}_removeFavorite"
+                  ></button>
+                </div>
+                `);
+                }, "");
+                document.getElementById(`favAccPageBody_${page}`).innerHTML =
+                  htmlAlerts;
+              }
+            }
+          },
+        };
+
+        createElements.createAccordion();
+        createElements.appendFavLinks();
+        QuickView.links.showHideAccordion();
+        QuickView.links.updateCurrentLinkPageHTML();
+      },
+      showHideAccordion: () => {
+        const { paginated, currentPage } = StoredData.quickView.favorites;
+        for (const page in paginated) {
+          if (Object.hasOwnProperty.call(paginated, page)) {
+            const ID = document.getElementById(`favAccCollapse_${page}`);
+            if (currentPage == page) {
+              ID.setAttribute("class", "accordion-collapse collapse show");
+            } else {
+              ID.setAttribute("class", "accordion-collapse collapse");
+            }
+          }
+        }
+      },
+      updateTotalFavorites: () => {
+        const { saved } = StoredData.quickView.favorites;
+        const length = Object.keys(saved).length;
+        document.getElementById(
+          "favoritesHeader"
+        ).innerText = ` Favorites: ${length} `;
+      },
+      setNumLinksToOpenAtOnce: (event) => {
+        const selected = Number(event.target.innerText);
+        StoredData.quickView.favorites.openLinkPagination = selected;
+        document.getElementById(
+          "setNumLinksToOpen"
+        ).innerText = ` ${selected} Per `;
+        QuickView.links.paginateLinksFromObjects(false, selected);
+        QuickView.links.appendToFavoritesList();
+      },
+      paginateLinksFromObjects: (arr, linkNum) => {
+        if (!arr) {
+          arr = StoredData.quickView.favorites.saved;
+        }
+        const paginated = Utility.Data.chunk(arr, linkNum);
+        StoredData.quickView.favorites.paginated = paginated;
+        const max = Object.keys(paginated).length;
+        StoredData.quickView.favorites.maxPage = max;
+        QuickView.links.updateCurrentLinkPageHTML();
+      },
+      changeLinkPage: (event) => {
+        const selection = event.target.id;
+        const { currentPage, maxPage, loading } =
+          StoredData.quickView.favorites;
+        const actions = {
+          NextFavLinks: () => {
+            if (currentPage == maxPage) {
+              return;
+            }
+            if (loading) {
+              return;
+            }
+            const updated = currentPage + 1;
+            StoredData.quickView.favorites.currentPage = updated;
+            QuickView.links.updateCurrentLinkPageHTML();
+            QuickView.links.showHideAccordion();
+          },
+          PrevFavLinks: () => {
+            if (currentPage == 1) {
+              return;
+            }
+            if (loading) {
+              return;
+            }
+            const updated = currentPage - 1;
+            StoredData.quickView.favorites.currentPage = updated;
+            QuickView.links.updateCurrentLinkPageHTML();
+            QuickView.links.showHideAccordion();
+          },
+        };
+        actions[selection]();
+      },
+      updateCurrentLinkPageHTML: () => {
+        const { currentPage, maxPage } = StoredData.quickView.favorites;
+        document.getElementById(
+          "currentFavLinksPage"
+        ).innerText = ` Page ${currentPage} : ${maxPage == 0 ? 1 : maxPage} `;
+      },
+      updateLinkPageSelection: (event) => {
+        const selected = event.target.innerText;
+        StoredData.quickView.favorites.currentPage = Number(selected);
+        QuickView.links.updateCurrentLinkPageHTML();
+        QuickView.links.showHideAccordion();
+      },
+      addLinkPagesToOptionalSelect: () => {
+        const div = document.createElement("div");
+        let html = "";
+        const { paginated } = StoredData.quickView.favorites;
+        if (Object.keys(paginated).length > 0) {
+          for (const key in paginated) {
+            if (Object.hasOwnProperty.call(paginated, key)) {
+              html += `<button class="dropdown-item">${key}</button>`;
+            }
+          }
+        } else {
+          html += `<button class="dropdown-item">1</button>`;
+        }
+        document.getElementById("optionalLinkPageSelection").innerHTML = html;
+      },
+      openFavoriteLinks: () => {
+        const { currentPage, paginated, loading } =
+          StoredData.quickView.favorites;
+        const links = paginated[currentPage];
+        if (loading) {
+          return;
+        }
+        links.forEach((l, i) => {
+          console.log(`Open: ${l.S} ${l.URL}`);
+          if (i == 0) {
+            window.open(l.URL, l.S);
+          } else {
+            setTimeout(() => {
+              const open = window.open(l.URL, l.S);
+            }, 100);
+          }
+        });
+        StoredData.quickView.favorites.loading = false;
+      },
+      saveFavLinks: () => {
+        const { saved } = StoredData.quickView.favorites;
+        const id = document.getElementById("storageActionResults");
+        Utility.Server.run()
+          .withSuccessHandler(() => {
+            Utility.Page.showSuccessAlert(id);
+          })
+          .withFailureHandler((err) => {
+            console.log(err);
+            Utility.Page.showFailureAlert(id, err);
+          })
+          .saveFavLinks(saved);
+      },
+      loadFavLinks: () => {
+        Utility.Server.run()
+          .withSuccessHandler((loaded) => {
+            const { openLinkPagination } = StoredData.quickView.favorites;
+            StoredData.quickView.favorites.saved = loaded;
+            QuickView.links.paginateLinksFromObjects(
+              loaded,
+              openLinkPagination
+            );
+            QuickView.links.appendToFavoritesList();
+            QuickView.links.addLinkPagesToOptionalSelect();
+            QuickView.links.updateTotalFavorites();
+          })
+          .withFailureHandler((err) => {
+            console.log(err);
+            const id = document.getElementById("storageActionResults");
+            Utility.Page.showFailureAlert(id, err);
+          })
+          .loadFavLinks();
+      },
+      clearFavLinks: () => {
+        const id = document.getElementById("storageActionResults");
+        Utility.Server.run()
+          .withSuccessHandler((result) => {
+            if (result) {
+              Utility.Page.showSuccessAlert(id);
+              const favAccId = document.getElementById("favAccordion");
+              favAccId.innerHTML = "";
+            }
+          })
+          .withFailureHandler((err) => {
+            console.log(err);
+            Utility.Page.showFailureAlert(id, err);
+          })
+          .clearFavLinks();
+      },
+    },
+  };
+
+  // Stored Data ================================
+  const StoredDataController = {
+    init: () => {
+      StoredData.symbols.forEach((s) => {
+        StoredData.rowObjects[s.symbol] = {};
+      });
+    },
+    update: (webSocketMsg) => {
+      const formatToRowObjects = (rawDataObj) => {
+        const convertToBaseVolume = (bVol, last) => {
+          return Math.trunc(Number(bVol) / Number(last))
+            .toString()
+            .slice(0, 8);
+        };
+        const convertToNearLow = (last, low) => {
+          const La = Number(last);
+          const Lo = Number(low);
+          const spread = (((La - Lo) / La) * 100).toFixed(2);
+          return spread;
+        };
+        const convertToSpread = (high, low) => {
+          const Hi = Number(high);
+          const Lo = Number(low);
+          const spread = (((Hi - Lo) / Lo) * 100).toFixed(2);
+          return spread;
+        };
+        rawDataObj.forEach((f) => {
+          const r = {
+            S: f.symbol,
+            Q: f.symbol.split("_")[1],
+            H: Number(f.high_24h).toFixed(8),
+            L: Number(f.low_24h).toFixed(8),
+            O: Number(f.open_24h).toFixed(8),
+            C: Number(f.last_price).toFixed(8),
+            QV: Number(f.quote_volume_24h).toFixed(2),
+            NL: convertToNearLow(f.last_price, f.low_24h),
+            LvH: convertToSpread(f.high_24h, f.low_24h),
+            URL:
+              "https://www.bitmart.com/trade/en?layout=pro&symbol=" + f.symbol,
+          };
+          StoredData.rowObjects[f.symbol] = r;
+        });
+      };
+      formatToRowObjects(webSocketMsg);
+    },
+  };
+
+  // Utility ================================
+  const ScannerUtility = {
+    Data: {},
+    Page: {
+      addEventListeners: () => {
+        const listeners = [
+          // Table Control
+          {
+            id: "filterByQuote",
+            fn: ScannerTable.User.filterByQuote,
+          },
+          {
+            id: [
+              "coinH_t1",
+              "highH_t1",
+              "lowH_t1",
+              "lastH_t1",
+              "nearLH_t1",
+              "spreadH_t1",
+              "qVolH_t1",
+
+              "coinH_t2",
+              "highH_t2",
+              "lowH_t2",
+              "lastH_t2",
+              "nearLH_t2",
+              "spreadH_t2",
+              "qVolH_t2",
+
+              "coinH_t3",
+              "highH_t3",
+              "lowH_t3",
+              "lastH_t3",
+              "nearLH_t3",
+              "spreadH_t3",
+              "qVolH_t3",
+            ],
+            fn: ScannerTable.User.filterByColumn,
+          },
+
+          // Quickview Modal
+          {
+            id: "quickViewModalLaunch",
+            fn: QuickView.charts.init,
+          },
+          {
+            id: "quickViewSpreadTableSelect",
+            fn: QuickView.charts.changeTableSource,
+          },
+          {
+            id: ["prevChartPageContainer", "nextChartPageContainer"],
+            fn: QuickView.charts.changeChartPage,
+          },
+          {
+            id: "optionalChartPageSelection",
+            fn: QuickView.charts.updateChartPageSelection,
+          },
+          {
+            id: "quickViewBody",
+            fn: QuickView.links.addFavorite,
+          },
+          {
+            id: "favoritesCol",
+            fn: QuickView.links.removeFavorite,
+          },
+          {
+            id: "numOfLinks",
+            fn: QuickView.links.setNumLinksToOpenAtOnce,
+          },
+          {
+            id: "optionalLinkPageSelection",
+            fn: QuickView.links.updateLinkPageSelection,
+          },
+          {
+            id: ["PrevFavLinks", "NextFavLinks"],
+            fn: QuickView.links.changeLinkPage,
+          },
+          {
+            id: "openFavLinks",
+            fn: QuickView.links.openFavoriteLinks,
+          },
+          // Save, Clear Links
+          {
+            id: "saveFavLinks",
+            fn: QuickView.links.saveFavLinks,
+          },
+          {
+            id: "clearFavLinks",
+            fn: QuickView.links.clearFavLinks,
+          },
+        ];
+        listeners.forEach((l) => {
+          const { id, fn } = l;
+          let getElementId;
+          if (Array.isArray(id)) {
+            id.forEach((i) => {
+              getElementId = document.getElementById(i);
+              getElementId.addEventListener("click", fn);
+            });
+          } else {
+            getElementId = document.getElementById(id);
+            getElementId.addEventListener("click", fn);
+          }
+        });
+      },
+      updateStatus: (isError = false) => {
+        const status = document.getElementById("marketStatus");
+        const marketStatus1 = document.getElementById("marketStatus");
+        if (isError) {
+          status.innerText = "Connection Error";
+          marketStatus1.style.color = "red";
+          return;
+        }
+        const ws1 = ScannerWebSocket.ws["ticker"];
+        const readyState1 = ws1.readyState;
+        const statusNumbers = {
+          0: { text: "Connecting", col: "gold" },
+          1: { text: "Online", col: "green" },
+          2: { text: "Closing", col: "red" },
+          3: { text: "Offline", col: "red" },
+        };
+        status.innerText = statusNumbers[readyState1].text;
+        marketStatus1.style.color = statusNumbers[readyState1].col;
+        setInterval(() => {
+          const ws2 = ScannerWebSocket.ws["ticker"];
+          const readyState2 = ws2.readyState;
+          status.innerText = statusNumbers[readyState2].text;
+          const marketStatus2 = document.getElementById("marketStatus");
+          marketStatus2.style.color = statusNumbers[readyState2].col;
+          if (readyState2 == 1) {
+            let time = new Date().toLocaleTimeString();
+            document.getElementById(
+              "lastUpdated"
+            ).innerHTML = `Last Updated: ${time}`;
+          }
+        }, 3000);
+      },
+      scroll: () => {
+        $(window).scroll(function () {
+          if ($(this).scrollTop() > 50) {
+            $("#back-to-top").attr(
+              "class",
+              "btn btn-info btn-sm back-to-top visible"
+            );
+          } else {
+            $("#back-to-top").attr(
+              "class",
+              "btn btn-info btn-sm back-to-top invisible"
+            );
+          }
+        });
+        // scroll body to 0px on click
+        $("#back-to-top").click(function () {
+          $("body, html").animate(
+            {
+              scrollTop: 0,
+            },
+            800
+          );
+          return false;
+        });
+      },
+    },
+  };
+</script>

@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <base target="_top" />
+    <?!= include("global-css"); ?>
+    <?!= include("scanner-css"); ?>
+    <title>Bitmart Utility</title>
+  </head>
+  <body>
+    <? var url = getScriptUrl();?>
+
+    <!-- Quickview Modal -->
+    <div class="modal fade" id="quickViewModal" tabindex="-1">
+      <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+        <div class="modal-content">
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <div class="col">
+              <h5 class="modal-title text-white">Quickview Charts</h5>
+            </div>
+            <div class="col text-center">
+              <div class="btn-group" role="group">
+                <button
+                  type="button"
+                  class="btn btn-outline-light dropdown-toggle btn-sm mx-3"
+                  data-bs-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  id="quickViewSpreadTableContainer"
+                >
+                  Spread > 20%
+                </button>
+                <div class="dropdown-menu" id="quickViewSpreadTableSelect">
+                  <button class="dropdown-item">0 - 10%</button>
+                  <button class="dropdown-item">10 - 20%</button>
+                  <button class="dropdown-item">> 20%</button>
+                </div>
+              </div>
+              <div
+                class="btn-group mx-2"
+                role="group"
+                aria-label="Chart Pagination"
+              >
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-light"
+                  id="prevChartPageContainer"
+                >
+                  <
+                </button>
+                <div class="btn-group" role="group">
+                  <button
+                    type="button"
+                    class="btn btn-outline-light dropdown-toggle btn-sm"
+                    data-bs-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    id="currentChartPage"
+                  >
+                    Page 1 : 1
+                  </button>
+                  <div class="dropdown-menu" id="optionalChartPageSelection">
+                    <button class="dropdown-item">1</button>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-light"
+                  id="nextChartPageContainer"
+                >
+                  >
+                </button>
+              </div>
+            </div>
+            <div class="col text-end">
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+          </div>
+          <!-- Modal Body -->
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row justify-content-center">
+                <!-- Favorites -->
+                <div
+                  class="col-2 me-5 sticky-top overflow-auto"
+                  id="favoritesContainer"
+                >
+                  <div class="row mb-1">
+                    <div class="col text-start">
+                      <h5 class="text-white" id="favoritesHeader">
+                        Favorites: 0
+                      </h5>
+                    </div>
+                    <div class="col text-end">
+                      <div
+                        class="btn-group"
+                        role="group"
+                        aria-label="pageToggle"
+                      >
+                        <button
+                          type="button"
+                          id="saveFavLinks"
+                          class="btn btn-sm btn-outline-light"
+                        >
+                          Save
+                        </button>
+                        <div class="btn-group" role="group">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light dropdown-toggle btn-sm"
+                            data-bs-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            id="clearFavLinksContainer"
+                          >
+                            Stored
+                          </button>
+                          <div class="dropdown-menu" id="clearFavLinks">
+                            <button class="dropdown-item">Clear</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="btn-group" role="group" aria-label="pageToggle">
+                      <div class="btn-group" role="group">
+                        <button
+                          type="button"
+                          class="btn btn-outline-light dropdown-toggle btn-sm"
+                          data-bs-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                          id="setNumLinksToOpen"
+                        >
+                          20 Per
+                        </button>
+                        <div class="dropdown-menu" id="numOfLinks">
+                          <button class="dropdown-item">5</button>
+                          <button class="dropdown-item">10</button>
+                          <button class="dropdown-item">15</button>
+                          <button class="dropdown-item">20</button>
+                        </div>
+                      </div>
+                      <div class="btn-group" role="group">
+                        <button
+                          type="button"
+                          class="btn btn-outline-light dropdown-toggle btn-sm"
+                          data-bs-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                          id="currentFavLinksPage"
+                        >
+                          Page 1 : 1
+                        </button>
+                        <div
+                          class="dropdown-menu"
+                          id="optionalLinkPageSelection"
+                        >
+                          <button class="dropdown-item">1</button>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        id="PrevFavLinks"
+                        class="btn btn-sm btn-outline-light"
+                      >
+                        <
+                      </button>
+                      <button
+                        type="button"
+                        id="openFavLinks"
+                        class="btn btn-sm btn-outline-light"
+                      >
+                        Open
+                      </button>
+                      <button
+                        type="button"
+                        id="NextFavLinks"
+                        class="btn btn-sm btn-outline-light"
+                      >
+                        >
+                      </button>
+                    </div>
+                  </div>
+                  <div class="row mt-2 text-center" id="favoritesCol">
+                    <div class="accordion" id="favAccordion"></div>
+                  </div>
+                </div>
+                <!-- Table -->
+                <div class="col-9">
+                  <table class="table table-borderless">
+                    <tbody class="text-white" id="quickViewBody"></tbody>
+                  </table>
+                  <div id="modalLoading"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Modal Footer -->
+          <div class="modal-footer">
+            <div class="col-2" id="storageActionResults"></div>
+            <div class="col"></div>
+            <div class="col-2 text-end">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+      <div class="container-fluid">
+        <h3 class="text-white">Bitmart Utility</h3>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="offcanvas offcanvas-start"
+          tabindex="-1"
+          id="navbarSupportedContent"
+        >
+          <div class="offcanvas-body bg-dark">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+              <li class="nav-item">
+                <a
+                  type="button"
+                  class="btn btn-sm btn-link text-white text-decoration-none"
+                  id="goToScanner"
+                >
+                  Scanner
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  type="button"
+                  class="btn btn-sm btn-link text-white text-decoration-none"
+                  id="goToTrade"
+                >
+                  Trade
+                </a>
+              </li>
+            </ul>
+            <div id="urlFetchQuota" class="text-light me-3 pt-1">0/20000</div>
+            <span class="text-white me-3 pt-1" id="version">v1.0</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Container -->
+    <div class="container-fluid">
+      <!-- Controls -->
+      <div class="row">
+        <div class="col text-center">
+          <div class="row justify-content-center mt-2" id="exchangeRow">
+            <div class="col-auto">
+              <div class="btn-group">
+                <button
+                  type="button"
+                  class="btn btn-info dropdown-toggle btn-sm"
+                  data-bs-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  id="filterByQuoteContainer"
+                >
+                  All
+                </button>
+                <div class="dropdown-menu" id="filterByQuote">
+                  <button class="dropdown-item">All</button>
+                  <button class="dropdown-item">BTC</button>
+                  <button class="dropdown-item">USDT</button>
+                  <button class="dropdown-item">ETH</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center mt-2">
+            <div class="col-auto">
+              <div class="btn-toolbar" role="toolbar">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#quickViewModal"
+                  id="quickViewModalLaunch"
+                >
+                  Quickview
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Banner -->
+      <div class="row mt-3">
+        <div class="col text-center">
+          <h4 class="text-white">Scanner</h4>
+        </div>
+      </div>
+      <!-- Market Online -->
+      <div class="row">
+        <div class="col">
+          <div class="row">
+            <div class="col text-center" id="marketOnline">
+              <span class="text-white">Status:</span>
+              <span id="marketStatus"></span>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <div class="col text-center">
+              <span class="text-white" id="lastUpdated">Last Updated:</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scanner -->
+      <div class="row justify-content-center">
+        <div class="col-8">
+          <div class="accordion" id="scannerAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="scannerTable1AccordionHeader">
+                <button
+                  class="accordion-button text-white"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#spreadGthan20"
+                  aria-expanded="true"
+                  aria-controls="spreadGthan20"
+                >
+                  Spread > 20%
+                </button>
+              </h2>
+              <div
+                id="spreadGthan20"
+                class="accordion-collapse collapse show"
+                aria-labelledby="scannerTable1AccordionHeader"
+                data-bs-parent="#scannerAccordion"
+              >
+                <div class="accordion-body">
+                  <!-- Table >20 -->
+                  <table
+                    class="table table-dark table-hover table-striped table-responsive text-center"
+                  >
+                    <thead class="thead-inverse text-white">
+                      <tr>
+                        <th>
+                          <div class="row">
+                            <div class="col text-center">
+                              <button
+                                type="button"
+                                class="btn btn-outline-light btn-sm"
+                                id="coinH_t1"
+                                data-bs-toggle-tt="tooltip"
+                                title="Name of pair"
+                              >
+                                Coin
+                              </button>
+                            </div>
+                          </div>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour high">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="highH_t1"
+                          >
+                            High
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour low">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="lowH_t1"
+                          >
+                            Low
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour open">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="openH_t1"
+                          >
+                            Open
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="The last price available"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="lastH_t1"
+                          >
+                            Last
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="Current spread from the low"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="nearLH_t1"
+                          >
+                            Near 24h-L
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="A spread between low & high"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="spreadH_t1"
+                          >
+                            Spread
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="Quote Volume">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="qVolH_t1"
+                          >
+                            Q Vol
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-white" id="scannerTableBody_t1"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="scannerTable2AccordionHeader">
+                <button
+                  class="accordion-button text-white collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#spread10to20"
+                  aria-expanded="false"
+                  aria-controls="spread10to20"
+                >
+                  Spread 10 - 20%
+                </button>
+              </h2>
+              <div
+                id="spread10to20"
+                class="accordion-collapse collapse"
+                aria-labelledby="scannerTable2AccordionHeader"
+                data-bs-parent="#scannerAccordion"
+              >
+                <div class="accordion-body">
+                  <!-- Table 10 - 20 -->
+                  <table
+                    class="table table-dark table-hover table-striped table-responsive text-center"
+                  >
+                    <thead class="thead-inverse text-white">
+                      <tr>
+                        <th>
+                          <div class="row">
+                            <div class="col text-center">
+                              <button
+                                type="button"
+                                class="btn btn-outline-light btn-sm"
+                                id="coinH_t2"
+                                data-bs-toggle-tt="tooltip"
+                                title="Name of pair"
+                              >
+                                Coin
+                              </button>
+                            </div>
+                          </div>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour high">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="highH_t2"
+                          >
+                            High
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour low">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="lowH_t2"
+                          >
+                            Low
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour open">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="openH_t2"
+                          >
+                            Open
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="The last price available"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="lastH_t2"
+                          >
+                            Last
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="Current spread from the low"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="nearLH_t2"
+                          >
+                            Near 24h-L
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="A spread between low & high"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="spreadH_t2"
+                          >
+                            Spread
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="Quote Volume">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="qVolH_t2"
+                          >
+                            Q Vol
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-white" id="scannerTableBody_t2"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="scannerTable3AccordionHeader">
+                <button
+                  class="accordion-button text-white collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#spread0to10"
+                  aria-expanded="false"
+                  aria-controls="spread0to10"
+                >
+                  Spread 0 - 10%
+                </button>
+              </h2>
+              <div
+                id="spread0to10"
+                class="accordion-collapse collapse"
+                aria-labelledby="scannerTable3AccordionHeader"
+                data-bs-parent="#scannerAccordion"
+              >
+                <div class="accordion-body">
+                  <!-- Table 10 - 20 -->
+                  <table
+                    class="table table-dark table-hover table-striped table-responsive text-center"
+                  >
+                    <thead class="thead-inverse text-white">
+                      <tr>
+                        <th>
+                          <div class="row">
+                            <div class="col text-center">
+                              <button
+                                type="button"
+                                class="btn btn-outline-light btn-sm"
+                                id="coinH_t3"
+                                data-bs-toggle-tt="tooltip"
+                                title="Name of pair"
+                              >
+                                Coin
+                              </button>
+                            </div>
+                          </div>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour high">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="highH_t3"
+                          >
+                            24h High
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour low">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="lowH_t3"
+                          >
+                            24h Low
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="24 hour open">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="openH_t3"
+                          >
+                            24h Open
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="The last price available"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="lastH_t3"
+                          >
+                            24h Last
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="Current spread from the low"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="nearLH_t3"
+                          >
+                            Near 24h-L
+                          </button>
+                        </th>
+                        <th
+                          data-bs-toggle-tt="tooltip"
+                          title="A spread between low & high"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="spreadH_t3"
+                          >
+                            24h Spread
+                          </button>
+                        </th>
+                        <th data-bs-toggle-tt="tooltip" title="Quote Volume">
+                          <button
+                            type="button"
+                            class="btn btn-outline-light btn-sm"
+                            id="qVolH_t3"
+                          >
+                            24h Q Vol
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-white" id="scannerTableBody_t3"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        id="back-to-top"
+        type="button"
+        class="btn btn-info btn-sm back-to-top invisible"
+      >
+        Top
+      </button>
+    </div>
+
+    <?!= include("global-js"); ?>
+    <?!= include("scanner-js"); ?>
+    <?!= include("pako-js"); ?>
+    <?!= include("tradingview-js"); ?>
+  </body>
+</html>

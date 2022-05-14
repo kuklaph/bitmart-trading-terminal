@@ -1,0 +1,233 @@
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+  crossorigin="anonymous"
+></script>
+
+<script>
+  $(document).ready(async function () {
+    Utility.Server.setVersion();
+    Utility.Server.urlFetchQuota();
+    setInterval(Utility.Server.urlFetchQuota, 120000);
+    const tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl, { trigger: "hover" });
+    });
+    Utility.Page.addNavListeners();
+  });
+</script>
+
+<script>
+  const Utility = {
+    sleep: async (t) => new Promise((s) => setTimeout(s, t)),
+    Data: {
+      chunk: (arr, chunkSize, type = "obj") => {
+        const res = [];
+        for (let i = 0; i < arr.length; i += chunkSize) {
+          const chunk = arr.slice(i, i + chunkSize);
+          res.push(chunk);
+        }
+        if (type == "obj") {
+          const obj = {};
+          res.forEach((el, i) => {
+            obj[i + 1] = el;
+          });
+          return obj;
+        } else {
+          return res;
+        }
+      },
+      sorts: (arr, chosen, direction) => {
+        const type = {
+          Coin: (a, b) => {
+            return direction ? (b.S > a.S ? 1 : -1) : a.S > b.S ? 1 : -1;
+          },
+          High: (a, b) => {
+            return direction ? b.H - a.H : a.H - b.H;
+          },
+          Low: (a, b) => {
+            return direction ? b.L - a.L : a.L - b.L;
+          },
+          Open: (a, b) => {
+            return direction ? b.O - a.O : a.O - b.O;
+          },
+          Last: (a, b) => {
+            return direction ? b.C - a.C : a.C - b.C;
+          },
+          "Near 24h-L": (a, b) => {
+            return direction ? b.NL - a.NL : a.NL - b.NL;
+          },
+          Spread: (a, b) => {
+            return direction ? b.LvH - a.LvH : a.LvH - b.LvH;
+          },
+          "Q Vol": (a, b) => {
+            return direction ? b.QV - a.QV : a.QV - b.QV;
+          },
+          Market: (a, b) => {
+            return direction
+              ? a.base > b.base
+                ? 1
+                : -1
+              : b.base > a.base
+              ? 1
+              : -1;
+          },
+          Change: (a, b) => {
+            return direction ? a.change - b.change : b.change - a.change;
+          },
+          Price: (a, b) => {
+            return direction
+              ? Number(a.price) - Number(b.price)
+              : Number(b.price) - Number(a.price);
+          },
+        };
+        return arr.sort(type[chosen]);
+      },
+      eToNumber: (num) => {
+        let sign = "";
+        (num += "").charAt(0) == "-" &&
+          ((num = num.substring(1)), (sign = "-"));
+        let arr = num.split(/[e]/gi);
+        if (arr.length < 2) return sign + num;
+        let dot = (0.1).toLocaleString().substr(1, 1),
+          n = arr[0],
+          exp = +arr[1],
+          w = (n = n.replace(/^0+/, "")).replace(dot, ""),
+          pos = n.split(dot)[1] ? n.indexOf(dot) + exp : w.length + exp,
+          L = pos - w.length,
+          s = "" + BigInt(w);
+        w =
+          exp >= 0
+            ? L >= 0
+              ? s + "0".repeat(L)
+              : r()
+            : pos <= 0
+            ? "0" + dot + "0".repeat(Math.abs(pos)) + s
+            : r();
+        L = w.split(dot);
+        if ((L[0] == 0 && L[1] == 0) || (+w == 0 && +s == 0)) w = 0;
+        return sign + w;
+        function r() {
+          return w.replace(new RegExp(`^(.{${pos}})(.)`), `$1${dot}$2`);
+        }
+      },
+    },
+    Page: {
+      addNavListeners: () => {
+        const listeners = [
+          {
+            id: ["goToScanner", "goToTrade"],
+            fn: Utility.Page.goToNav,
+            type: "click",
+          },
+        ];
+        listeners.forEach((l) => {
+          const { id, fn } = l;
+          let getElementId;
+          if (Array.isArray(id)) {
+            id.forEach((i) => {
+              getElementId = document.getElementById(i);
+              getElementId.addEventListener("click", fn);
+            });
+          } else {
+            getElementId = document.getElementById(id);
+            getElementId.addEventListener("click", fn);
+          }
+        });
+      },
+      goToNav: (event) => {
+        const page = event.target.innerText.toLowerCase();
+        Utility.Server.run()
+          .withSuccessHandler((link) => {
+            return (window.top.location.href = link + `?page=${page}`);
+          })
+          .getScriptUrl();
+      },
+      showSuccessAlert: (id) => {
+        const alertHtml = `
+        <div class="alert alert-success alert-dismissible fade show p-1 mb-0 text-center" role="alert" id="tempSuccess">
+          <strong>Success!</strong>
+        </div>`;
+        id.innerHTML = alertHtml;
+        const selectAlert = document.querySelector("#tempSuccess");
+        const a = new bootstrap.Alert(selectAlert);
+        setTimeout(() => {
+          a.close();
+        }, 3000);
+      },
+      showFailureAlert: (id, err) => {
+        const alertHtml = `
+        <div class="alert alert-danger alert-dismissible fade show p-1 mb-0 text-center" role="alert" id="tempError">
+          <strong>Error!</strong> ${err}
+        </div>`;
+        id.innerHTML = alertHtml;
+        const selectAlert = document.querySelector("#tempError");
+        const a = new bootstrap.Alert(selectAlert);
+        setTimeout(() => {
+          a.close();
+        }, 3000);
+      },
+      loading: (
+        id,
+        state,
+        position = "center",
+        size = "reg",
+        float = false,
+        text = false
+      ) => {
+        const el = document.getElementById(id);
+        const sizes = {
+          small: "spinner-border-sm",
+          reg: "",
+        };
+        if (state) {
+          if (float) {
+            el.innerHTML = `<div class="spinner-border ${sizes[size]} text-white" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>`;
+          } else {
+            el.innerHTML = `<div class="d-flex justify-content-${position} text-white">
+              <div class="spinner-border ${sizes[size]}" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>`;
+          }
+        } else {
+          if (text) {
+            el.innerText = text;
+          } else {
+            el.innerHTML = "";
+          }
+        }
+      },
+    },
+    Server: {
+      run: () => {
+        return google.script.run;
+      },
+      urlFetchQuota: () => {
+        Utility.Server.run()
+          .withSuccessHandler((stats) => {
+            document.getElementById(
+              "urlFetchQuota"
+            ).innerText = `${stats}/20000`;
+          })
+          .withFailureHandler((err) => {
+            throw err;
+          })
+          .urlFetchQuota();
+      },
+      setVersion: () => {
+        Utility.Server.run()
+          .withSuccessHandler((v) => {
+            document.getElementById("version").innerText = v;
+          })
+          .Version();
+      },
+    },
+  };
+</script>
