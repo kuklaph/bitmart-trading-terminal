@@ -1,4 +1,7 @@
 # bitmart-trading-terminal
+
+![Bitmart Utility Demo](https://user-images.githubusercontent.com/30103848/169155967-0539e32a-2369-41fe-ae41-48f825fca8fd.png)
+
 Open source trading terminal utilizing Google Apps Script / Javascript / Bootstrap / Google Sheets for specialized trading options not found on the normal Bitmart exchange terminal.
 
 Project Container = Google Sheet
