@@ -272,8 +272,10 @@ const cancelActiveOrder = (order_id) => {
     tradeDetails = [];
   try {
     const orderDetails = getExOrderInfo(order_id);
-    if (orderDetails.status == "5") {
+    if (orderDetails.status == "5" || orderDetails.status == "6") {
       tradeDetails = getExTrades(orderDetails.symbol);
+      cont = true;
+    } else if (orderDetails.status == "4") {
       cont = true;
     } else {
       DB.Orders.remove(order_id);
@@ -1474,10 +1476,12 @@ const triggerActions = (dbData) => {
       const addBuyIds = smartBuy.map((o) => {
         return o.forUpdate;
       });
+      DB.Actions.Sort.sheet("smartBuy", 5);
       DB.Orders.addIDs("smartBuy", addBuyIds);
       const addSellIds = smartSell.map((o) => {
         return o.forUpdate;
       });
+      DB.Actions.Sort.sheet("smartSell", 5);
       DB.Orders.addIDs("smartSell", addSellIds);
       const comb = [...smartBuy, ...smartSell, ...toRemove];
       comb.forEach((o) => {

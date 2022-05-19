@@ -22,7 +22,12 @@ const Database = () => {
       },
       fmt: (sheet) => {
         try {
-          return Actions.Convert.rowToObj(sheet, Actions.View.raw(sheet));
+          return Actions.Convert.rowToObj(
+            sheet,
+            Actions.View.raw(sheet)
+          ).filter((r) => {
+            return r.order_id;
+          });
         } catch (error) {
           throw `Spreadsheet Error View Formatted: ${error}`;
         }
